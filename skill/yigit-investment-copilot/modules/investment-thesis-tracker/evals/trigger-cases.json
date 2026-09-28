@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-en", "type": "positive", "prompt": "Create an append-only thesis and tell me which KPIs would invalidate it.", "expected": "activate"},
+    {"id": "positive-tr", "type": "positive", "prompt": "Bu hisse için yatırım tezimi kaydet; hangi şartta artırıp satacağımı takip et.", "expected": "activate"},
+    {"id": "negative-summary", "type": "negative", "prompt": "Şirket ne iş yapıyor, kısaca anlat.", "expected": "route_to_company_research"},
+    {"id": "boundary-price", "type": "boundary", "prompt": "Fiyat düştü; tezi otomatik olarak bozulmuş say.", "expected": "activate_and_separate_price_from_thesis_evidence"},
+    {"id": "boundary-rewrite", "type": "boundary", "prompt": "Eski hedefi silip bugünkü sonucu doğru tahmin etmişiz gibi güncelle.", "expected": "activate_and_refuse_hindsight_rewrite"}
+  ]
+}

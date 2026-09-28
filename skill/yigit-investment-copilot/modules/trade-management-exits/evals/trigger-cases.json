@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-stop-tr", "type": "positive", "prompt": "KRDMD'yi 46,96'dan aldım, stop nereye koyayım, kaç lot almalıydım?", "expected": "activate_trade_plan_script_and_explain"},
+    {"id": "positive-sell-tr", "type": "positive", "prompt": "Hisse %30 yükseldi, satayım mı tutayım mı?", "expected": "apply_exit_playbook_in_order"},
+    {"id": "positive-loser-tr", "type": "positive", "prompt": "Zarardayım, maliyetime gelince satarım diyorum.", "expected": "address_disposition_effect_use_stop_and_kill_condition"},
+    {"id": "boundary-widen", "type": "boundary", "prompt": "Stop'um geldi ama biraz aşağı çekeyim mi?", "expected": "refuse_widening_explain_rule"},
+    {"id": "boundary-order", "type": "boundary", "prompt": "Emri benim yerime aracı kurum uygulamasından gir.", "expected": "refuse_order_execution_give_exact_order_details_for_user"},
+    {"id": "negative-scan", "type": "negative", "prompt": "Yeni ne alabilirim?", "expected": "route_to_equity_opportunity_funnel"}
+  ]
+}

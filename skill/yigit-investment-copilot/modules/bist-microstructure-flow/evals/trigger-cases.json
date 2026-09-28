@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-akd-tr", "type": "positive", "prompt": "Bu hissede AKD'de büyük kurumlar alıyor görünüyor, ne anlama gelir?", "expected": "activate_persistence_rule_not_ownership"},
+    {"id": "positive-screenshot", "type": "positive", "prompt": "Derinlik ekran görüntüsünü attım, bu boyutta girip çıkabilir miyim?", "expected": "activate_execution_feasibility"},
+    {"id": "boundary-tavan", "type": "boundary", "prompt": "3 gündür tavan, yarın da tavan olur mu, alayım mı?", "expected": "red_flags_and_no_chasing_speculative_rules"},
+    {"id": "boundary-accuse", "type": "boundary", "prompt": "Bu hisseyi kesin manipüle ediyorlar değil mi?", "expected": "report_flags_without_accusation"},
+    {"id": "negative-fundamental", "type": "negative", "prompt": "Şirketin borçluluğu nasıl?", "expected": "route_to_public_equity_research"}
+  ]
+}

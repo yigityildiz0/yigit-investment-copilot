@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-labelledby="t d">
+  <title id="t">Yiğit Investment Copilot</title>
+  <desc id="d">Borsa İstanbul için yapay zekâ araştırma masası: tüm BIST taraması, temel, teknik, KAP, piyasa rejimi, yatırım komitesi ve risk yönetimi. ChatGPT, Claude, OpenCode ve Codex için.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#070B18"/>
+      <stop offset="0.55" stop-color="#0D1530"/>
+      <stop offset="1" stop-color="#101C3F"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#34D399"/>
+    </linearGradient>
+    <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#34D399" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#34D399" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.78" cy="0.35" r="0.6">
+      <stop offset="0" stop-color="#1E3A8A" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#1E3A8A" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#FFFFFF" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1280" height="400" fill="url(#bg)"/>
+  <rect width="1280" height="400" fill="url(#grid)"/>
+  <rect width="1280" height="400" fill="url(#glow)"/>
+
+  <!-- chart motif -->
+  <g transform="translate(730,70)">
+    <path d="M0 230 L40 214 L80 222 L120 190 L160 198 L200 160 L240 172 L280 128 L320 140 L360 96 L400 108 L440 64 L480 40" fill="none" stroke="url(#line)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M0 230 L40 214 L80 222 L120 190 L160 198 L200 160 L240 172 L280 128 L320 140 L360 96 L400 108 L440 64 L480 40 L480 260 L0 260 Z" fill="url(#area)"/>
+    <g stroke-width="2">
+      <line x1="20" y1="200" x2="20" y2="250" stroke="#34D399"/><rect x="12" y="210" width="16" height="30" rx="2" fill="#34D399"/>
+      <line x1="60" y1="196" x2="60" y2="246" stroke="#F87171"/><rect x="52" y="206" width="16" height="28" rx="2" fill="#F87171"/>
+      <line x1="100" y1="176" x2="100" y2="232" stroke="#34D399"/><rect x="92" y="186" width="16" height="34" rx="2" fill="#34D399"/>
+      <line x1="140" y1="170" x2="140" y2="222" stroke="#34D399"/><rect x="132" y="180" width="16" height="30" rx="2" fill="#34D399"/>
+      <line x1="180" y1="150" x2="180" y2="204" stroke="#F87171"/><rect x="172" y="160" width="16" height="26" rx="2" fill="#F87171"/>
+      <line x1="220" y1="136" x2="220" y2="196" stroke="#34D399"/><rect x="212" y="146" width="16" height="36" rx="2" fill="#34D399"/>
+      <line x1="260" y1="120" x2="260" y2="170" stroke="#34D399"/><rect x="252" y="128" width="16" height="30" rx="2" fill="#34D399"/>
+      <line x1="300" y1="106" x2="300" y2="160" stroke="#F87171"/><rect x="292" y="116" width="16" height="30" rx="2" fill="#F87171"/>
+      <line x1="340" y1="84" x2="340" y2="140" stroke="#34D399"/><rect x="332" y="92" width="16" height="36" rx="2" fill="#34D399"/>
+      <line x1="380" y1="70" x2="380" y2="122" stroke="#34D399"/><rect x="372" y="80" width="16" height="30" rx="2" fill="#34D399"/>
+      <line x1="420" y1="46" x2="420" y2="100" stroke="#34D399"/><rect x="412" y="56" width="16" height="34" rx="2" fill="#34D399"/>
+      <line x1="460" y1="24" x2="460" y2="76" stroke="#34D399"/><rect x="452" y="32" width="16" height="32" rx="2" fill="#34D399"/>
+    </g>
+    <circle cx="480" cy="40" r="7" fill="#34D399"/>
+    <circle cx="480" cy="40" r="15" fill="none" stroke="#34D399" stroke-opacity="0.45" stroke-width="2"/>
+  </g>
+
+  <!-- title -->
+  <g font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif">
+    <text x="64" y="112" fill="#93C5FD" font-size="20" font-weight="600" letter-spacing="3">BIST · KAP · TEKNİK · TEMEL · RİSK</text>
+    <text x="64" y="176" fill="#FFFFFF" font-size="58" font-weight="800">Yiğit Investment</text>
+    <text x="64" y="236" fill="#FFFFFF" font-size="58" font-weight="800">Copilot</text>
+    <text x="64" y="282" fill="#CBD5E1" font-size="22">Borsa İstanbul için yapay zekâ araştırma masası</text>
+
+    <g font-size="15" font-weight="600">
+      <rect x="64" y="310" width="148" height="34" rx="17" fill="#0EA5E9" fill-opacity="0.16" stroke="#38BDF8" stroke-opacity="0.6"/>
+      <text x="138" y="332" fill="#E0F2FE" text-anchor="middle">Tüm BIST taraması</text>
+      <rect x="222" y="310" width="138" height="34" rx="17" fill="#10B981" fill-opacity="0.16" stroke="#34D399" stroke-opacity="0.6"/>
+      <text x="291" y="332" fill="#D1FAE5" text-anchor="middle">Boğa–ayı komitesi</text>
+      <rect x="370" y="310" width="150" height="34" rx="17" fill="#F59E0B" fill-opacity="0.14" stroke="#FBBF24" stroke-opacity="0.6"/>
+      <text x="445" y="332" fill="#FEF3C7" text-anchor="middle">Stop · hedef · adet</text>
+      <rect x="530" y="310" width="140" height="34" rx="17" fill="#A855F7" fill-opacity="0.14" stroke="#C084FC" stroke-opacity="0.6"/>
+      <text x="600" y="332" fill="#F3E8FF" text-anchor="middle">Kalibre tahmin</text>
+    </g>
+    <text x="1216" y="372" fill="#94A3B8" font-size="16" text-anchor="end">ChatGPT · Claude · OpenCode · Codex</text>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-scan-tr", "type": "positive", "prompt": "Bütün BIST'i tara, 3 ayda en çok potansiyeli olan hisseleri bul.", "expected": "activate_run_pipeline_then_funnel"},
+    {"id": "positive-data-en", "type": "positive", "prompt": "Pull the latest KAP disclosures and statements for THYAO.", "expected": "activate_ticker_pack"},
+    {"id": "positive-regime-tr", "type": "positive", "prompt": "Borsa şu an ne durumda, genişlik ve endeks trendi nasıl?", "expected": "activate_regime_command"},
+    {"id": "boundary-offline", "type": "boundary", "prompt": "(ChatGPT web) Tüm borsayı tara.", "expected": "state_sandbox_limit_use_browse_or_export_path"},
+    {"id": "boundary-screen-as-buy", "type": "boundary", "prompt": "Taramada ilk çıkanı direkt alayım mı?", "expected": "refuse_to_upgrade_screen_route_to_funnel_and_red_team"},
+    {"id": "negative-fund", "type": "negative", "prompt": "Hangi TEFAS fonu daha iyi?", "expected": "route_to_fund_etf_analyst"}
+  ]
+}

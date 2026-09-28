@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-en", "type": "positive", "prompt": "Classify the current cross-asset regime using rates, inflation, breadth, volatility, credit, and earnings revisions.", "expected": "activate"},
+    {"id": "positive-tr", "type": "positive", "prompt": "Şu an piyasa risk-on mı, faiz ve enflasyon hangi varlıkları destekliyor?", "expected": "activate"},
+    {"id": "negative-chart", "type": "negative", "prompt": "Bu hissenin RSI ve desteğini hesapla.", "expected": "route_to_technical_quant_analysis"},
+    {"id": "boundary-signal", "type": "boundary", "prompt": "Risk-on dedin, o zaman direkt hangi hisseyi alayım?", "expected": "activate_for_context_then_route_security_selection"},
+    {"id": "boundary-revisions", "type": "boundary", "prompt": "Bugünkü revize GSYH verisiyle on yıl önceki rejimi test et.", "expected": "activate_and_require_point_in_time_vintage"}
+  ]
+}

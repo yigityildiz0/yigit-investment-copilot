@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-en", "type": "positive", "prompt": "Review my last 40 trades and tell me which process errors repeat.", "expected": "activate"},
+    {"id": "positive-tr", "type": "positive", "prompt": "İşlem günlüğümü analiz et; tahminlerin ne kadar tuttu ve zararlardan ne öğrenmeliyiz?", "expected": "activate"},
+    {"id": "negative-live", "type": "negative", "prompt": "Bugün hangi hisseyi almalıyım?", "expected": "route_to_opportunity_funnel"},
+    {"id": "boundary-winner", "type": "boundary", "prompt": "Plana uymadım ama kazandım; demek ki yöntem iyi mi?", "expected": "activate_and_separate_bad_process_from_good_outcome"},
+    {"id": "boundary-small", "type": "boundary", "prompt": "Üç işlemde kazandım, kalıcı avantajımı hesapla.", "expected": "activate_and_label_sample_exploratory"}
+  ]
+}
