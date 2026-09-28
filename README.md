@@ -56,20 +56,19 @@ Bütünlük kontrolü: [SHA256SUMS.txt](https://github.com/yigityildiz0/yigit-in
 ## 🧭 Nasıl çalışır?
 
 ```mermaid
-flowchart LR
-    A[İstek<br/>'3 ayda ne alayım?'] --> B[Sorgu<br/>vade · bütçe · kayıp sınırı]
-    B --> C[Veri motoru<br/>626 hisse · fiyat geçmişi · KAP · bilanço · makro]
-    C --> D[Piyasa rejimi<br/>maruziyet bandı]
-    C --> E[Çok şeritli tarama<br/>ADAY listesi]
-    D --> F
-    E --> F[Huni<br/>8–12 aday → 3–5 finalist]
-    F --> G[Derin analiz<br/>temel · değerleme · KAP · teknik · akış]
-    G --> H[Yatırım komitesi<br/>ayı → boğa → lensler → risk]
-    H --> I[Kırmızı takım +<br/>işlem öncesi kapı]
-    I -->|geçti| J[İşlem planı<br/>giriş · stop · hedef · adet]
-    I -->|geçmedi| K[İZLE / AKSİYON YOK<br/>tetikleyiciyle]
-    J --> L[Tahmin defteri<br/>vadede puanlama]
-    L --> M[Günlük ve öğrenme]
+flowchart TD
+    A["İstek: '3 ayda ne alayım?'"] --> B["Sorgu: vade · bütçe · kayıp sınırı"]
+    B --> C["Veri motoru: 626 hisse · fiyat geçmişi · KAP · bilanço · makro"]
+    C --> D["Piyasa rejimi → maruziyet bandı"]
+    C --> E["Çok şeritli tarama → ADAY listesi"]
+    D --> F["Huni: 8–12 aday → 3–5 finalist"]
+    E --> F
+    F --> G["Derin analiz: temel · değerleme · KAP · teknik · akış"]
+    G --> H["Yatırım komitesi: ayı → boğa → lensler → risk"]
+    H --> I{"Kırmızı takım + işlem öncesi kapı"}
+    I -->|geçti| J["İşlem planı: giriş · stop · hedef · adet"]
+    I -->|geçmedi| K["İZLE / AKSİYON YOK + tetikleyici"]
+    J --> L["Tahmin defteri → vadede puanlama → öğrenme"]
 ```
 
 ## 🏗️ Mimari
@@ -78,39 +77,23 @@ Tek bir yönlendirici skill (`SKILL.md`) ve ihtiyaç anında açılan 22 modül:
 
 ```mermaid
 flowchart TB
-    R[SKILL.md<br/>yönlendirici + ilkeler] --> DATA
-    R --> ANALYSIS
-    R --> DECISION
-    R --> RISK
-    subgraph DATA[Veri]
-      MDE[market-data-engine]
-      TMA[turkey-markets-analysis]
-      FEG[finance-evidence-guard]
+    R["SKILL.md · yönlendirici + ilkeler"]
+    R --> DATA & ANALYSIS & DECISION & RISK
+    subgraph DATA["Veri"]
+      direction TB
+      MDE["market-data-engine"] ~~~ TMA["turkey-markets-analysis"] ~~~ FEG["finance-evidence-guard"]
     end
-    subgraph ANALYSIS[Analiz]
-      PER[public-equity-research]
-      NCI[news-catalyst-intelligence]
-      TQA[technical-quant-analysis]
-      MRA[market-regime-analysis]
-      BMF[bist-microstructure-flow]
-      FEA[fund-etf-analyst]
-      CRY[crypto-research-readonly]
-      WSP[warrant-structured-product-analyst]
+    subgraph ANALYSIS["Analiz"]
+      direction TB
+      PER["public-equity-research"] ~~~ NCI["news-catalyst-intelligence"] ~~~ TQA["technical-quant-analysis"] ~~~ MRA["market-regime-analysis"] ~~~ BMF["bist-microstructure-flow"] ~~~ FEA["fund-etf-analyst"] ~~~ CRY["crypto-research-readonly"] ~~~ WSP["warrant-structured-product-analyst"]
     end
-    subgraph DECISION[Karar]
-      EOF[equity-opportunity-funnel]
-      PMF[probabilistic-market-forecast]
-      IC[investment-committee]
-      IRT[investment-red-team]
-      PTG[pre-trade-investment-gate]
+    subgraph DECISION["Karar"]
+      direction TB
+      EQF["equity-opportunity-funnel"] ~~~ PMF["probabilistic-market-forecast"] ~~~ IC["investment-committee"] ~~~ IRT["investment-red-team"] ~~~ PTG["pre-trade-investment-gate"]
     end
-    subgraph RISK[Risk ve öğrenme]
-      PRS[portfolio-risk-and-sizing]
-      TME[trade-management-exits]
-      ITT[investment-thesis-tracker]
-      IJR[investment-journal-review]
-      QRL[quant-research-lab]
-      FLC[financial-literacy-coach]
+    subgraph RISK["Risk ve öğrenme"]
+      direction TB
+      PRS["portfolio-risk-and-sizing"] ~~~ TME["trade-management-exits"] ~~~ ITT["investment-thesis-tracker"] ~~~ IJR["investment-journal-review"] ~~~ QRL["quant-research-lab"] ~~~ FLC["financial-literacy-coach"]
     end
 ```
 
