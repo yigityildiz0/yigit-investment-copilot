@@ -91,7 +91,8 @@ def refresh(master):
         for old, rep in PUBLIC_REPLACEMENTS:
             new = new.replace(old, rep)
         if new != text:
-            path.write_text(new, encoding="utf-8")
+            path.write_bytes(new.encode("utf-8"))
+    normalize_lf(SKILL)
     print(f"refreshed {SKILL.relative_to(ROOT)} from {master}")
 
 
@@ -141,11 +142,25 @@ def validate():
     return problems, len(files), len(desc)
 
 
+TEXT_SUFFIXES = {".md", ".py", ".json", ".txt", ".sh", ".ps1", ".svg", ".yml", ".yaml", ".csv"}
+
+
+def normalize_lf(folder):
+    """Rewrite text files with LF line endings so every platform gets identical bytes."""
+    for path in files_of(folder):
+        if path.suffix in TEXT_SUFFIXES:
+            data = path.read_bytes()
+            if b"\r\n" in data:
+                path.write_bytes(data.replace(b"\r\n", b"\n"))
+
+
 def zip_tree(zf, folder, prefix, transform=None):
     for path in files_of(folder):
         arc = (Path(prefix) / path.relative_to(folder)).as_posix()
         if transform and path.name == "SKILL.md" and path.parent == folder:
-            zf.writestr(arc, transform(path.read_text(encoding="utf-8")))
+            zf.writestr(arc, transform(path.read_text(encoding="utf-8")).replace("\r\n", "\n"))
+        elif path.suffix in TEXT_SUFFIXES:
+            zf.writestr(arc, path.read_bytes().replace(b"\r\n", b"\n"))
         else:
             zf.write(path, arc)
 
@@ -179,7 +194,7 @@ def build():
         zip_tree(zf, ROOT / "install", "install")
         for doc in ("README.md", "README.en.md", "LICENSE", "DISCLAIMER.md", "CHANGELOG.md"):
             if (ROOT / doc).exists():
-                zf.write(ROOT / doc, doc)
+                zf.writestr(doc, (ROOT / doc).read_bytes().replace(b"\r\n", b"\n"))
     outputs.append(allin)
     lines = []
     for item in outputs:
