@@ -20,21 +20,31 @@ Test mode A quickly with `python scripts/borsa.py macro`; a network error means 
 ## Commands (mode A, from the skill root)
 
 ```bash
-python scripts/borsa.py pipeline --horizon 3m            # full BIST: snapshot → histories → KAP → regime → scan → finalists → REPORT.md
+python scripts/borsa.py pipeline --horizon 3m            # full BIST: snapshot → histories → KAP → regime → scan → finalists → REPORT.md + REPORT.html
 python scripts/borsa.py pipeline --horizon 2w --universe XU100 --finalists 6
+python scripts/borsa.py pipeline --market america --horizon 6m   # S&P 500 members (no KAP/İş Yatırım steps)
 python scripts/borsa.py ticker THYAO --horizon 1m        # one stock: 5y prices, technicals, ranges, KAP 120d, statements
+python scripts/borsa.py brief --watchlist izle.csv       # morning note data: regime, macro, KAP, calendar, movers, plan triggers
+python scripts/borsa.py sector --name "Finans"           # sector rotation table + one sector's members
 python scripts/borsa.py regime                           # breadth, index trend, distribution/follow-through days, macro
 python scripts/borsa.py kap --days 3                     # market-wide important KAP disclosures
+python scripts/borsa.py macro                            # TCMB policy rate, CPI, real rate, FX + cross-asset
+python scripts/borsa.py fon screen --category "hisse"    # TEFAS funds (screen | fund KOD | compare A B C)
+python scripts/borsa.py taban --horizon 3m               # historical base rates of setups on the cached universe
+python scripts/borsa.py izle --watchlist izle.csv        # positions and watchlist against their written plans
+python scripts/borsa.py portfoy --candidates A B C --budget 250000   # risk-parity allocation + portfolio risk
+python scripts/report_html.py --run-dir borsa-out/<klasör>          # self-contained HTML dashboard of a run
 ```
 
 Module scripts (all standard-library Python 3.9+):
 
-- `scripts/bist_snapshot.py` — every BIST stock in one call (~626 rows, ~90 fields, XU030/XU050/XU100/XUTUM tags).
+- `scripts/bist_snapshot.py` — every BIST stock in one call (~626 rows, ~115 fields incl. analyst consensus, targets, surprises, ex-dividend dates; XU030/XU050/XU100/XUTUM tags); `--market america --universe SPX|NDX|DJI` for US members.
 - `scripts/price_history.py` — `--mode chart` full OHLCV + dividends/splits; `--mode spark` bulk close-only (20 symbols per call). Both repair unadjusted corporate actions using the BIST ±10% daily-limit rule and log every repair.
-- `scripts/bist_scan.py` — multi-lane percentile screen by horizon profile; writes `scan_ranked.csv`, `scan_summary.md`, `scan_excluded.csv` and `funnel_seed.json` (universe ledger + hashes for `equity-opportunity-funnel/scripts/validate_funnel.py`).
+- `scripts/bist_scan.py` — multi-lane percentile screen by horizon profile (12 lanes incl. `expectations`); writes `scan_ranked.csv`, `scan_summary.md`, `scan_excluded.csv` and `funnel_seed.json` (universe ledger + hashes for `equity-opportunity-funnel/scripts/validate_funnel.py`). Market-aware (reads `snapshot.meta.json`).
 - `scripts/kap_feed.py` — KAP disclosures by ticker or market-wide, classified into event classes with importance and caveats; `--details N` pulls cleaned full text.
 - `scripts/financials_isy.py` — quarterly statements (industrial XI_29 or bank UFRS_K), discrete quarters, TTM, margins, ROE, net debt/EBITDA, anomaly checks.
-- `scripts/macro_snapshot.py` — TCMB indicative FX (official XML) + BIST indices, USD/TRY, gold, Brent, VIX, DXY, US10Y, S&P 500, EM and Türkiye ETFs, USD-based XU100.
+- `scripts/macro_snapshot.py` — TCMB policy rate and corridor, TÜFE (annual/monthly) and the ex-post real rate, indicative FX (official XML) + BIST indices, USD/TRY, gold, Brent, VIX, DXY, US10Y, S&P 500, EM and Türkiye ETFs, USD-based XU100.
+- `scripts/tefas_funds.py` — TEFAS: `screen` (every fund ranked inside its peer group by multi-horizon consistency and cost, real returns, flags), `fund KOD` (identity, fees, valör, allocation, NAV history and metrics), `compare` (same-window metrics and correlations).
 - `scripts/map_export.py` — maps an uploaded TradingView / İş Yatırım / broker export into the snapshot schema.
 
 ## Workflow

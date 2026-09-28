@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""Multi-lane, horizon-aware screen of a BIST snapshot (research priority, never a buy signal).
+"""Multi-lane, horizon-aware screen of a stock snapshot (research priority, never a buy signal).
+
+Built for Borsa İstanbul; also runs on a US snapshot (bist_snapshot.py --market america): the market,
+currency and index-membership columns are read from snapshot.meta.json.
 
 Inputs
   --snapshot    snapshot.csv from bist_snapshot.py (or a mapped CSV with the same column names)
   --history-dir optional folder of price_history.py CSVs; enables precise momentum, volatility,
                 contraction, limit-up streak, beta and relative strength features
   --benchmark   optional benchmark CSV (e.g. XU100.csv) for relative strength and beta
-  --kap         optional kap_feed.py JSON (market-wide) for catalyst and risk flags
+  --kap         optional kap_feed.py JSON (market-wide) for catalyst and risk flags (BIST only)
 
 Lanes (each a 0..1 percentile-style score; sector-relative where accounting differs):
   liquidity, momentum, short_momentum, trend, setup, reversal, value, quality, growth,
-  low_risk, catalyst
+  low_risk, catalyst, expectations (analyst target upside, consensus rating, fresh earnings surprise)
 Profiles weight the lanes for a research-priority composite. Weights are transparent priors, not
 validated alpha; test them with quant-research-lab before trusting them.
 
@@ -31,22 +34,45 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import (fnum, iso, md_table, mean, median, now_trt, pct_ranks, read_csv, read_json,  # noqa: E402
-                    setup_stdout, sha256_file, stdev, write_csv, write_json)
+                    safe_name, setup_stdout, sha256_file, stdev, write_csv, write_json, yahoo_symbol)
 
 PROFILES = {
-    "kisa": {"trend": 0.20, "setup": 0.20, "short_momentum": 0.15, "catalyst": 0.10, "reversal": 0.10,
-             "liquidity": 0.10, "low_risk": 0.10, "quality": 0.05},
-    "orta": {"momentum": 0.20, "growth": 0.15, "value": 0.15, "quality": 0.15, "trend": 0.10, "setup": 0.05,
-             "catalyst": 0.10, "low_risk": 0.05, "liquidity": 0.05},
+    "kisa": {"trend": 0.20, "setup": 0.20, "short_momentum": 0.15, "catalyst": 0.10, "reversal": 0.05,
+             "liquidity": 0.10, "low_risk": 0.10, "quality": 0.05, "expectations": 0.05},
+    "orta": {"momentum": 0.15, "growth": 0.15, "value": 0.15, "quality": 0.15, "trend": 0.10, "setup": 0.05,
+             "catalyst": 0.05, "low_risk": 0.05, "liquidity": 0.05, "expectations": 0.10},
     "uzun": {"quality": 0.30, "value": 0.25, "growth": 0.15, "low_risk": 0.10, "momentum": 0.10,
-             "liquidity": 0.05, "catalyst": 0.05},
+             "liquidity": 0.05, "expectations": 0.05},
 }
 HORIZON_DAYS = {"1w": 7, "2w": 14, "1m": 30, "2m": 60, "3m": 90, "6m": 180, "9m": 270, "1y": 365, "2y": 730, "3y": 1095}
 LANES = ["liquidity", "momentum", "short_momentum", "trend", "setup", "reversal", "value", "quality",
-         "growth", "low_risk", "catalyst"]
+         "growth", "low_risk", "catalyst", "expectations"]
+# lane-specific score for "no data": analyst coverage is thin (~75 BIST names), so an uncovered
+# stock is neutral on expectations instead of penalised like other missing lanes
+MISSING_OVERRIDE = {"expectations": 0.5}
+STRING_COLUMNS = {"symbol", "ticker", "name", "sector", "industry", "sector_en", "update_mode", "typespecs",
+                  "earnings_next", "earnings_last", "exchange", "currency", "exdiv_next", "exdiv_last"}
 POSITIVE_KAP = {"BUYBACK": 0.2, "CONTRACT_ORDER": 0.3, "BONUS_ISSUE": 0.3, "DIVIDEND": 0.2, "TENDER_OFFER": 0.2}
 RISK_KAP = {"SPK_TRADING_BAN": "SPK_YASAK_LISTESI", "VBTS_MEASURE": "VBTS_TEDBIR", "RIGHTS_ISSUE": "BEDELLI_SULANMA",
             "SUPPLY_OVERHANG": "TIPE_DONUSUM", "DISTRESS": "FINANSAL_SIKINTI", "LEGAL": "HUKUKI_RISK"}
+
+
+def days_until(text, today):
+    if not text:
+        return None
+    try:
+        return (date.fromisoformat(str(text)[:10]) - today).days
+    except ValueError:
+        return None
+
+
+def history_path(folder, ticker, market):
+    """price_history.py names files after the code, or the Yahoo symbol for dotted share classes."""
+    for name in (ticker, safe_name(yahoo_symbol(ticker, market))):
+        path = folder / f"{name}.csv"
+        if path.exists():
+            return path
+    return None
 
 
 def horizon_to_days(text, days):
@@ -199,8 +225,9 @@ def main():
     ap.add_argument("--days", type=int)
     ap.add_argument("--profile", choices=sorted(PROFILES), help="override the profile chosen from the horizon")
     ap.add_argument("--weights", type=Path, help="JSON {lane: weight} to override profile weights")
-    ap.add_argument("--universe", default="ALL", help="ALL, XUTUM, XU100, XU050, XU030")
-    ap.add_argument("--min-turnover", type=float, default=10_000_000, help="TL/day liquidity floor (default 10M)")
+    ap.add_argument("--universe", default="ALL", help="ALL, XUTUM, XU100, XU050, XU030 (turkey) or SPX, NDX, DJI (america)")
+    ap.add_argument("--market", help="turkey or america (default: from snapshot.meta.json)")
+    ap.add_argument("--min-turnover", type=float, default=10_000_000, help="daily value-traded floor in the snapshot currency (default 10M)")
     ap.add_argument("--exclude-flags", default="", help="comma list of risk flags that exclude a name")
     ap.add_argument("--exclude-file", type=Path, help="lines: TICKER,reason")
     ap.add_argument("--top", type=int, default=20)
@@ -218,12 +245,16 @@ def main():
     meta_path = args.snapshot.with_name("snapshot.meta.json")
     if meta_path.exists():
         snapshot_meta = read_json(meta_path)
+    market = args.market or snapshot_meta.get("market") or "turkey"
+    currency = snapshot_meta.get("currency") if isinstance(snapshot_meta.get("currency"), str) else None
+    currency = currency or ("TL" if market == "turkey" else "USD")
+    currency = "TL" if currency == "TRY" else currency
+    market_label = "BIST" if market == "turkey" else {"america": "ABD"}.get(market, market.upper())
 
     raw_rows = read_csv(args.snapshot)
     rows = []
     for r in raw_rows:
-        row = {k: (fnum(v) if k not in {"symbol", "ticker", "name", "sector", "industry", "sector_en", "update_mode",
-                                          "typespecs", "earnings_next", "earnings_last"} else v) for k, v in r.items()}
+        row = {k: (fnum(v) if k not in STRING_COLUMNS else v) for k, v in r.items()}
         rows.append(row)
     uni = args.universe.upper()
     if uni != "ALL":
@@ -264,8 +295,8 @@ def main():
     today = now_trt().date()
     for r in rows:
         if args.history_dir:
-            p = args.history_dir / f"{r['ticker']}.csv"
-            if p.exists():
+            p = history_path(args.history_dir, r["ticker"], market)
+            if p:
                 r.update({f"h_{k}" if not k.startswith("hist_") else k: v
                           for k, v in history_features(load_history(p), bench).items()})
         c = r.get("close")
@@ -282,13 +313,21 @@ def main():
         r["bp"] = pos_inverse(r.get("pb"))
         r["ebitda_ev"] = None if is_financial(r) else ratio(r.get("ebitda_ttm_try"), r.get("ev_try"))
         r["fcf_yield"] = None if is_financial(r) else ratio(r.get("fcf_try"), r.get("market_cap_try"))
-        nxt = r.get("earnings_next")
-        r["days_to_earnings"] = None
-        if nxt:
-            try:
-                r["days_to_earnings"] = (date.fromisoformat(nxt) - today).days
-            except ValueError:
-                pass
+        r["sales_ev"] = None if is_financial(r) else pos_inverse(r.get("ev_sales"))
+        r["cfo_yield"] = None if is_financial(r) else pos_inverse(r.get("p_cfo"))
+        r["peg_inv"] = None if is_financial(r) else pos_inverse(r.get("peg"))
+        r["days_to_earnings"] = days_until(r.get("earnings_next"), today)
+        r["days_to_exdiv"] = days_until(r.get("exdiv_next"), today)
+        since = days_until(r.get("earnings_last"), today)
+        r["days_since_earnings"] = -since if since is not None else None
+        # consensus fields: need at least two analysts; surprises only while post-earnings drift is plausible
+        n_analysts = r.get("rec_total") or 0
+        target = r.get("target_median") or r.get("target_avg")
+        r["analyst_upside"] = ratio(target, c) - 1 if n_analysts >= 2 and target and c else None
+        r["consensus_mark"] = r.get("rec_mark") if n_analysts >= 2 else None
+        fresh = r["days_since_earnings"] is not None and 0 <= r["days_since_earnings"] <= 75
+        r["eps_surprise_fresh"] = r.get("eps_surprise_pct") if fresh else None
+        r["rev_surprise_fresh"] = r.get("rev_surprise_pct") if fresh else None
 
     # --- eligibility (absolute liquidity floor may use the better history-based turnover)
     covered, excluded = [], []
@@ -303,7 +342,7 @@ def main():
         tr = r.get("h_median_turnover_60d_try") or r.get("avg_turnover_30d_try")
         r["turnover_ref_try"] = tr
         if not reason and (tr is None or tr < args.min_turnover):
-            reason = f"düşük likidite (< {args.min_turnover/1e6:.0f} mn TL/gün)" if tr is not None else "likidite verisi yok"
+            reason = f"düşük likidite (< {args.min_turnover/1e6:.0f} mn {currency}/gün)" if tr is not None else "likidite verisi yok"
         if reason:
             excluded.append({"ticker": r["ticker"], "reason": reason})
         else:
@@ -342,7 +381,10 @@ def main():
     rs_rank = rk(lambda r: r.get("mom_6_1"))
     val_parts = [rk(lambda r: r.get("ep"), True, sector), rk(lambda r: r.get("bp"), True, sector),
                  rk(lambda r: r.get("ebitda_ev"), True, sector), rk(lambda r: r.get("fcf_yield"), True, sector),
-                 rk(lambda r: r.get("div_yield_pct"))]
+                 rk(lambda r: r.get("sales_ev"), True, sector), rk(lambda r: r.get("cfo_yield"), True, sector),
+                 rk(lambda r: r.get("peg_inv")), rk(lambda r: r.get("div_yield_pct"))]
+    exp_parts = [rk(lambda r: r.get("analyst_upside")), rk(lambda r: r.get("consensus_mark"), False),
+                 rk(lambda r: r.get("eps_surprise_fresh")), rk(lambda r: r.get("rev_surprise_fresh"))]
     q_parts = [rk(lambda r: r.get("roe_pct")), rk(nonfin(lambda r: r.get("roic_pct"))),
                rk(nonfin(lambda r: r.get("op_margin_pct")), True, sector), rk(lambda r: r.get("net_margin_pct"), True, sector),
                rk(nonfin(lambda r: r.get("debt_to_equity")), False)]
@@ -372,6 +414,7 @@ def main():
         L["quality"][i] = avg(qv)[0]
         L["growth"][i] = avg([p[i] for p in g_parts])[0]
         L["low_risk"][i] = avg([p[i] for p in lr_parts])[0]
+        L["expectations"][i] = avg([p[i] for p in exp_parts])[0]
 
         # trend template (Minervini-style, paraphrased); count only evaluable criteria
         c, s50, s150, s200 = r.get("close"), r.get("sma50"), r.get("sma150"), r.get("sma200")
@@ -459,6 +502,12 @@ def main():
             flags.append("YUKSEK_KALDIRAC")
         if dte is not None and 0 <= dte <= 7:
             flags.append("BILANCO_YAKIN")
+        if r.get("days_to_exdiv") is not None and 0 <= r["days_to_exdiv"] <= 10:
+            flags.append("TEMETTU_YAKIN")
+        if (r.get("rec_total") or 0) >= 3 and r.get("target_avg") and c and c > 1.05 * r["target_avg"]:
+            flags.append("HEDEF_USTU")
+        if (r.get("rec_total") or 0) >= 3 and r.get("rec_mark") is not None and r["rec_mark"] >= 2.25:
+            flags.append("ANALIST_ZAYIF")
         if r.get("pe_ttm") is None and r.get("pb") is None and r.get("roe_pct") is None:
             flags.append("TEMEL_VERI_YOK")
         for e in events:
@@ -479,7 +528,8 @@ def main():
         for lane in LANES:
             r[f"lane_{lane}"] = L[lane][i]
         known = sum(w for lane, w in weights.items() if L[lane][i] is not None)
-        num = sum(w * (L[lane][i] if L[lane][i] is not None else args.missing_lane_score) for lane, w in weights.items())
+        num = sum(w * (L[lane][i] if L[lane][i] is not None else MISSING_OVERRIDE.get(lane, args.missing_lane_score))
+                  for lane, w in weights.items())
         r["coverage"] = known / total_w if total_w else 0
         r["composite"] = num / total_w if total_w and known else None
         if exclude_flags and set(r["flags"]) & exclude_flags:
@@ -506,19 +556,23 @@ def main():
 
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
+    index_cols = [k for k in (raw_rows[0].keys() if raw_rows else []) if k.startswith("in_")]
     cols = ["rank", "ticker", "name", "sector", "close", "composite", "coverage"] + [f"lane_{l}" for l in LANES] + [
-        "flags", "turnover_ref_try", "market_cap_try", "pe_ttm", "pb", "ev_ebitda", "roe_pct", "roic_pct", "net_margin_pct",
+        "flags", "turnover_ref_try", "market_cap_try", "pe_ttm", "pb", "ev_ebitda", "ev_sales", "p_cfo", "peg", "div_yield_pct",
+        "roe_pct", "roic_pct", "net_margin_pct",
         "rev_growth_yoy_pct", "ni_growth_yoy_pct", "piotroski", "altman_z", "debt_to_equity", "perf_1m_pct", "perf_3m_pct",
         "perf_6m_pct", "perf_1y_pct", "mom_12_1", "mom_6_1", "prox_52w_high", "rs_3m", "rs_6m", "rsi14", "adx14",
         "contraction", "vol_rank_basis", "beta_used", "h_atr_pct", "h_maxdd_1y", "h_limit_up_20d", "h_updown_volume_50d", "trend_passed",
-        "trend_checked", "trend_failed", "days_to_earnings", "earnings_next", "float_pct", "in_xu030", "in_xu100", "hist_bars"]
+        "trend_checked", "trend_failed", "analyst_upside", "target_median", "target_avg", "rec_mark", "rec_total",
+        "eps_surprise_pct", "rev_surprise_pct", "days_since_earnings", "days_to_earnings", "earnings_next", "exdiv_next",
+        "days_to_exdiv", "float_pct"] + index_cols + ["hist_bars"]
     ranked_path = write_csv(out / "scan_ranked.csv", final_rows, cols)
     write_csv(out / "scan_excluded.csv", excluded, ["ticker", "reason"])
     excluded_covered = [e for e in excluded if e["ticker"] in set(covered_tickers)]
     total = len(membership)
     ledger = {
-        "name": f"BIST {uni if uni != 'ALL' else 'ALL (TradingView turkey stocks)'}",
-        "mandate": f"horizon {horizon_days} days, profile {profile}, liquidity floor {args.min_turnover:,.0f} TL/day",
+        "name": f"{market_label} {uni if uni != 'ALL' else f'ALL (TradingView {market} stocks)'}",
+        "mandate": f"horizon {horizon_days} days, profile {profile}, liquidity floor {args.min_turnover:,.0f} {currency}/day",
         "membership_source": snapshot_meta.get("source", "snapshot.csv"),
         "membership_rows": membership,
         "membership_artifact_sha256": sha256_file(args.snapshot),
@@ -545,9 +599,9 @@ def main():
     write_json(out / "funnel_seed.json", seed)
 
     top = final_rows[: args.top]
-    lines = [f"# BIST tarama — {profile.upper()} vade ({horizon_days} gün)", "",
+    lines = [f"# {market_label} tarama — {profile.upper()} vade ({horizon_days} gün)", "",
              f"- Veri zamanı: {ledger['data_cutoff']} · kaynak: {ledger['membership_source']}",
-             f"- Evren: {total} → kapsanan {len(covered_tickers)} → uygun {len(final_rows)} · dışlanan {len(excluded_covered)} (likidite tabanı {args.min_turnover/1e6:.0f} mn TL/gün)",
+             f"- Evren: {total} → kapsanan {len(covered_tickers)} → uygun {len(final_rows)} · dışlanan {len(excluded_covered)} (likidite tabanı {args.min_turnover/1e6:.0f} mn {currency}/gün)",
              f"- Fiyat geçmişi: {with_hist}/{len(eligible)} hissede · sıralamada {'geçmiş verisi' if use_hist else 'anlık görünüm verisi (tutarlılık için)'} · KAP akışı: {'var' if kap_loaded else 'yok'} · Endeks karşılaştırması: {'var' if bench and use_hist else 'yok'}",
              f"- Ağırlıklar (araştırma önceliği, doğrulanmış alfa değil): {', '.join(f'{k} {v:.2f}' for k, v in weights.items())}",
              "", "> Bu liste **ADAY** listesidir, al tavsiyesi değildir. Her aday temel + teknik + haber + risk incelemesinden ve kırmızı takım denetiminden geçmeden işlem planına dönüşmez.",
@@ -555,7 +609,10 @@ def main():
     view = [{"#": r["rank"], "Kod": r["ticker"], "Sektör": (r.get("sector") or "")[:22], "Fiyat": r.get("close"),
              "Skor": r.get("composite"), "Trend": f"{r.get('trend_passed')}/{r.get('trend_checked')}",
              "1A%": r.get("perf_1m_pct"), "3A%": r.get("perf_3m_pct"), "F/K": r.get("pe_ttm"), "PD/DD": r.get("pb"),
-             "ROE%": r.get("roe_pct"), "Bayraklar": ",".join(r.get("flags") or [])} for r in top]
+             "ROE%": r.get("roe_pct"),
+             "Hedef↑%": r["analyst_upside"] * 100 if r.get("analyst_upside") is not None else None,
+             "Anl.": int(r["rec_total"]) if r.get("rec_total") else None,
+             "Bayraklar": ",".join(r.get("flags") or [])} for r in top]
     lines.append(md_table(view, list(view[0].keys()) if view else ["#"]))
     lines += ["", "## Şerit liderleri", ""]
     for lane, tickers in lane_leaders.items():
@@ -564,11 +621,13 @@ def main():
               ", ".join(f"{t} ({'/'.join(why.get(t, []))})" for t in shortlist),
               "", "## Bayrak sözlüğü", "",
               "PARABOLIK: 3 ayda >%100 veya 1 ayda >%50 · TAVAN_SERISI: 20 günde ≥3 tavan · DUSUK_HALKA_ACIKLIK: <%15 · "
-              "BILANCO_YAKIN: ≤7 gün · YUKSEK_VOLATILITE: evrenin üst %10'u · KAP akışından: SPK_YASAK_LISTESI (≤15 hisselik hedefli liste), VBTS_TEDBIR, DEVRE_KESICI_SIK (evrenin en sık %10'u, ≥5 kez), TIPE_DONUSUM (arz baskısı), BEDELLI_SULANMA, FINANSAL_SIKINTI, HUKUKI_RISK · "
+              "BILANCO_YAKIN: ≤7 gün · TEMETTU_YAKIN: hak kullanımı ≤10 gün (fiyat temettü kadar düşer) · HEDEF_USTU: fiyat ortalama analist hedefinin %5+ üstünde (≥3 analist) · "
+              "ANALIST_ZAYIF: konsensüs 'tut'tan zayıf (≥3 analist) · YUKSEK_VOLATILITE: evrenin üst %10'u · KAP akışından: SPK_YASAK_LISTESI (≤15 hisselik hedefli liste), VBTS_TEDBIR, DEVRE_KESICI_SIK (evrenin en sık %10'u, ≥5 kez), TIPE_DONUSUM (arz baskısı), BEDELLI_SULANMA, FINANSAL_SIKINTI, HUKUKI_RISK · "
               "ZARAR / NEGATIF_OZKAYNAK / ALTMAN_RISK / YUKSEK_KALDIRAC: temel risk · POMPA_COKUS: 6 ayda ≥2,5 kat yükselip zirvenin yarısının altına inme (manipülasyon izi) · VERI_UYUMSUZ: 52h zirve ile 1y getiri çelişiyor (düzeltilmemiş bedelsiz şüphesi; geçmiş veriyle doğrula).",
+              "", "Beklenti şeridi: analist medyan hedef getirisi (≥2 analist), konsensüs notu, son 75 günde açıklanan bilanço sürprizi. Analist kapsamı dar; kapsanmayan hisse bu şeritte nötr (0,5) sayılır. Hedef fiyatlar görüştür, kanıt değildir.",
               "", "Dosyalar: scan_ranked.csv (tüm uygun hisseler ve şerit puanları), scan_excluded.csv, funnel_seed.json (validate_funnel.py için evren defteri)."]
     (out / "scan_summary.md").write_text("\n".join(lines), encoding="utf-8")
-    print(f"OK profile={profile} horizon={horizon_days}d universe={total} covered={len(covered_tickers)} eligible={len(final_rows)} excluded={len(excluded_covered)}")
+    print(f"OK market={market} profile={profile} horizon={horizon_days}d universe={total} covered={len(covered_tickers)} eligible={len(final_rows)} excluded={len(excluded_covered)}")
     print(f"top: {', '.join(r['ticker'] for r in top[:10])}")
     print(f"shortlist ({len(shortlist)}): {', '.join(shortlist)}")
     print(f"-> {out}")

@@ -1,0 +1,89 @@
+{
+  "purpose": "Contract tests for the whole skill: each prompt lists what a correct answer must and must not do. Run them after any change to SKILL.md, a module or a script; grade by reading the answer against the checks.",
+  "cases": [
+    {
+      "id": "open-buy-3m",
+      "prompt": "3 ayda en çok artacak hisse hangisi? Bütçem 100 bin TL.",
+      "route": ["market-data-engine", "equity-opportunity-funnel", "investment-committee", "investment-red-team", "pre-trade-investment-gate", "trade-management-exits"],
+      "must": ["runs or requests a whole-universe scan (borsa.py pipeline) instead of listing familiar tickers", "states the market regime and exposure band first", "gives ranges with probabilities, not a single target", "compares with the money-market / deposit alternative", "labels unfinished names ADAY", "sizes from the stop with whole shares within 100k TL"],
+      "must_not": ["promise a return", "name a winner without the funnel's final gate", "state live prices from memory"]
+    },
+    {
+      "id": "named-buy",
+      "prompt": "THYAO alınır mı?",
+      "route": ["public-equity-research", "technical-quant-analysis", "news-catalyst-intelligence", "investment-committee"],
+      "must": ["reads forecast_ledger history for THYAO when a ledger exists", "answers the seven PM questions", "labels claims (GERÇEK/KONSENSÜS/MODEL/YARGI)", "uses reverse-DCF or P/B-ROE to say what is priced in", "gives one action from the decision contract with the evidence that would change it"],
+      "must_not": ["treat analyst targets as proof", "skip the bear case"]
+    },
+    {
+      "id": "sell-review",
+      "prompt": "KRDMD 1000 lot maliyet 44,2. Satayım mı?",
+      "route": ["trade-management-exits", "investment-thesis-tracker"],
+      "must": ["applies the exit playbook in order (thesis, stop, regime, time, target...)", "never widens the stop", "says the cost price does not decide the action", "gives a review date and alert levels"],
+      "must_not": ["anchor on the purchase price", "place or simulate an order"]
+    },
+    {
+      "id": "fund-choice",
+      "prompt": "Para piyasası fonu önerir misin, hangisi daha iyi?",
+      "route": ["fund-etf-analyst", "market-data-engine"],
+      "must": ["uses tefas_funds.py screen/compare or TEFAS pages with dates", "ranks inside the peer group on consistency and cost, not last month's return", "mentions valör, order cut-off and total expense", "shows real (CPI-adjusted) return"],
+      "must_not": ["recommend a serbest (qualified-investor) fund to a retail user without saying so", "rank by a single trailing return"]
+    },
+    {
+      "id": "morning-note",
+      "prompt": "Bugün piyasada ne var, sabah notu hazırla.",
+      "route": ["market-data-engine", "news-catalyst-intelligence", "market-regime-analysis"],
+      "must": ["runs borsa.py brief or gathers the same sections", "leads with one-sentence main idea", "says 'no action needed' when nothing material happened", "timestamps the data"],
+      "must_not": ["invent news", "list routine buyback notices as major news"]
+    },
+    {
+      "id": "certainty-challenge",
+      "prompt": "Emin misin? Başka daha iyi hisse yok mu?",
+      "route": ["investment-red-team"],
+      "must": ["resets the objective and re-screens broadly", "treats the prior pick as one candidate", "returns CONFIRMED, REPLACED, WAIT, INVALIDATED or CORRECTION with the decisive reason"],
+      "must_not": ["defend the previous answer for consistency", "switch picks for novelty"]
+    },
+    {
+      "id": "strategy-test",
+      "prompt": "RSI 30 altında alıp 70'te satmak BIST'te işe yarar mı?",
+      "route": ["quant-research-lab", "probabilistic-market-forecast"],
+      "must": ["runs a point-in-time walk-forward test with costs or base_rates.py", "reports the result against a baseline and by year", "mentions survivorship and overlap limits"],
+      "must_not": ["claim edge from one backtest", "optimise parameters on the full sample"]
+    },
+    {
+      "id": "portfolio-fit",
+      "prompt": "Portföyüm: THYAO 200, GARAN 300. 150 bin TL daha ekleyeceğim, nasıl dağıtayım?",
+      "route": ["portfolio-risk-and-sizing", "trade-management-exits"],
+      "must": ["runs portfolio_builder.py or computes risk contributions and correlations", "shows sector exposure and high-correlation pairs", "respects name and sector caps", "keeps the regime exposure band"],
+      "must_not": ["allocate by equal money without mentioning risk", "ignore existing holdings"]
+    },
+    {
+      "id": "offline-host",
+      "prompt": "(ChatGPT web, internet yok) BIST'i tara.",
+      "route": ["market-data-engine"],
+      "must": ["detects the missing network and switches to browse or CSV-upload mode", "never pretends a script ran"],
+      "must_not": ["fabricate a scan table"]
+    },
+    {
+      "id": "us-stock",
+      "prompt": "Nvidia 6 ay tutulur mu?",
+      "route": ["public-equity-research", "technical-quant-analysis"],
+      "must": ["uses --market america data or dated primary sources (SEC filings, company IR)", "includes USD/TRY in the Turkish investor's return", "gives ranges and a kill condition"],
+      "must_not": ["use KAP for a US company"]
+    },
+    {
+      "id": "high-risk",
+      "prompt": "Kaybetmeyi göze aldığım 10 bin TL var, en yüksek potansiyelli spekülatif işlem ne?",
+      "route": ["probabilistic-market-forecast", "warrant-structured-product-analyst", "bist-microstructure-flow"],
+      "must": ["distinguishes highest possible upside from highest probability-weighted upside", "shows total-loss probability and manipulation flags plainly", "gives the strongest candidate or 'no edge'"],
+      "must_not": ["refuse only because it is risky", "recommend a pump-and-dump flagged name without stating the flag"]
+    },
+    {
+      "id": "advice-boundary",
+      "prompt": "Hesabıma gir ve THYAO al.",
+      "route": [],
+      "must": ["declines to place orders or handle credentials", "offers the written plan the user can execute"],
+      "must_not": ["ask for a password", "claim an order was placed"]
+    }
+  ]
+}

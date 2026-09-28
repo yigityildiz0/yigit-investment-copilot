@@ -1,6 +1,6 @@
 ---
 name: yigit-investment-copilot
-description: "Investment research and decision copilot for BIST stocks, TEFAS funds, global stocks and ETFs, crypto, VİOP, warrants and gold. Scans all of Borsa İstanbul with live data scripts, ranks candidates for a stated horizon, combines fundamental, valuation, technical, KAP/news, macro-regime and flow evidence, runs an investment committee (bull vs bear) and red-team review, then gives probability ranges, buy/hold/sell/trim decisions, entry-stop-target plans, position size and exit rules; also backtests strategies without look-ahead bias and tracks forecast calibration. Turkish triggers: ne alayım, hangi hisse, BIST'i tara, X ayda en çok ne artar, alınır mı, satayım mı, ne zaman satmalıyım, stop nereye, kaç lot, KAP haberi, bilanço, teknik analiz, piyasa ne durumda, portföy, fon, varant, kripto, emin misin. Research only; never places orders."
+description: "Investment research and decision copilot for BIST stocks, TEFAS funds, US stocks, ETFs, crypto, VİOP, warrants and gold. Scans all of Borsa İstanbul (and S&P 500) with live data scripts, ranks candidates for a stated horizon, combines fundamental, valuation, analyst-expectation, technical, KAP/news, macro-regime and flow evidence, runs an investment committee and red-team review, then gives probability ranges, buy/hold/sell/trim decisions, entry-stop-target plans, position size, portfolio risk and exit rules; screens TEFAS funds, writes morning notes, backtests strategies and tracks forecast calibration with lessons. Turkish triggers: ne alayım, hangi hisse, BIST'i tara, X ayda en çok ne artar, alınır mı, satayım mı, ne zaman satmalıyım, stop nereye, kaç lot, KAP haberi, bilanço, değerleme, teknik analiz, piyasa ne durumda, sabah bülteni, sektör, portföy, hangi fon, varant, kripto, emin misin. Research only; never places orders."
 ---
 
 # Yiğit Investment Copilot
@@ -23,13 +23,18 @@ Act as the decision orchestrator: an independent, broker-agnostic research desk.
 - [references/intake.md](references/intake.md) for what to ask, when, and the defaults.
 - [references/master-pipelines.md](references/master-pipelines.md) for the step-by-step flows (buy, named stock, sell/review, portfolio, routines, strategy test).
 - [references/investing-playbook.md](references/investing-playbook.md) for the evidence map, horizon playbooks, Türkiye realities and behavioural guards.
+- [references/pm-judgment-standard.md](references/pm-judgment-standard.md) before any action on a named stock: seven PM questions, claim labels, valuation and risk standards.
+- [references/report-templates.md](references/report-templates.md) for morning notes, earnings previews/reviews, sector notes, idea generation, one-page memos and the numbers tie-out.
 
 ## Host modes and data
 
 - **Shell + internet (Claude Code, Codex/ChatGPT desktop, OpenCode):** run from the skill root:
-  - `python scripts/borsa.py pipeline --horizon 3m` — whole-BIST scan → regime → KAP → finalists → `REPORT.md`
+  - `python scripts/borsa.py pipeline --horizon 3m` — whole-BIST scan → regime → KAP → finalists → `REPORT.md` + `REPORT.html` (`--market america` for S&P 500)
   - `python scripts/borsa.py ticker KOD --horizon 1m` — one-stock evidence pack
-  - `python scripts/borsa.py regime` · `python scripts/borsa.py kap --days 3` · `python scripts/borsa.py macro`
+  - `python scripts/borsa.py brief --watchlist izle.csv` — morning note data · `sector [--name X]` — sector rotation
+  - `python scripts/borsa.py fon screen|fund|compare` — TEFAS funds · `taban --horizon 3m` — historical base rates of setups
+  - `python scripts/borsa.py izle --watchlist izle.csv` — positions vs plans · `portfoy --candidates ... --budget N` — risk-parity allocation and portfolio risk
+  - `python scripts/borsa.py regime` · `kap --days 3` · `macro` (policy rate, CPI, real rate, FX, global)
 - **Sandbox without internet (ChatGPT web/mobile, claude.ai):** follow `modules/market-data-engine/references/offline-and-chatgpt-mode.md` (browse primary pages with timestamps, or map an uploaded export with `map_export.py` and run the scan offline).
 - **Connectors:** if a finance MCP such as borsa-mcp or OpenBB is connected, use it with the same evidence rules.
 
@@ -38,17 +43,18 @@ Test with `python scripts/borsa.py macro`; on a network error switch modes inste
 ## Route the request
 
 - Open-ended buy ("ne alayım", "en çok artacak", alternatives, many stocks) → `equity-opportunity-funnel` fed by `market-data-engine`. Never bypass the funnel with a familiar-ticker list or a screen-grade output.
-- Named company research, statements, valuation → `public-equity-research` (or the public-equity-investing plugin where installed).
+- Named company research, statements, valuation, "ne fiyatlanmış", earnings preview/review → `public-equity-research` (`valuation_models.py`; or the public-equity-investing plugin where installed).
+- Morning note ("bugün ne var", "sabah bülteni"), sector view → `borsa.py brief` / `sector` + `references/report-templates.md`.
 - KAP disclosures, news, catalysts, calendars → `news-catalyst-intelligence`.
 - Charts, indicators, setups, entry timing, support/resistance → `technical-quant-analysis`.
 - Market regime, breadth, macro, sector rotation → `market-regime-analysis` (+ `turkey-markets-analysis` transmission map).
 - Order book, AKD, takas, tavan/taban, manipulation risk, execution size → `bist-microstructure-flow`.
 - "Ne kadar yükselir/düşer", targets, probabilities → `probabilistic-market-forecast` (ensemble + abstention + forecast ledger).
 - Bull vs bear, "farklı açılardan", investor lenses, final decision on a finalist → `investment-committee`.
-- Stops, targets, sizing a plan, "ne zaman satayım", adding/reducing → `trade-management-exits` (with `portfolio-risk-and-sizing`).
+- Stops, targets, sizing a plan, "ne zaman satayım", adding/reducing, watchlist checks → `trade-management-exits` (`watchlist_monitor.py`; with `portfolio-risk-and-sizing` and `portfolio_builder.py` for portfolio fit).
 - Backtests, "bu strateji işe yarar mı", rule changes → `quant-research-lab`.
 - BIST/KAP/TEFAS/TCMB/SPK rules, taxes, mechanics, VİOP and warrants context → `turkey-markets-analysis`.
-- Funds/ETFs → `fund-etf-analyst`; crypto → `crypto-research-readonly`; warrants/certificates → `warrant-structured-product-analyst`.
+- Funds/ETFs, "hangi fon" → `fund-etf-analyst` (`tefas_funds.py` via `borsa.py fon`); US stocks → same flows with `--market america`; crypto → `crypto-research-readonly`; warrants/certificates → `warrant-structured-product-analyst`.
 - Evidence checks on any live or disputed number → `finance-evidence-guard`.
 - "Emin misin?", repeat analysis, concentrated or leveraged ideas → `investment-red-team`.
 - About to act → `pre-trade-investment-gate`; after acting → `investment-thesis-tracker`, `investment-journal-review`.
@@ -63,10 +69,10 @@ Use the narrowest owner first, then synthesize. A brief prompt changes answer le
 3. Check the market regime for equity decisions; state the exposure band when it constrains the action.
 4. If details are missing, give a clearly labelled preliminary screen with assumptions; ask only for inputs that block an exact product, quantity or reliance-grade action.
 5. Collect current evidence with timestamps, delay status, market status and adjustment status. Never fill missing current values from memory.
-6. Build bear, base and bull cases with conditions, calibrated probability ranges when evidence supports them, catalysts, invalidation, expected value vs the cash/deposit alternative, and expected loss.
+6. Answer the seven PM questions (`pm-judgment-standard.md`) and build bear, base and bull cases with conditions, calibrated probability ranges when evidence supports them, catalysts, invalidation, expected value vs the cash/deposit alternative (policy rate as the hurdle), and expected loss. Start from the base rate (`borsa.py taban`) and the ledger history of the name.
 7. Run the committee for consequential decisions and an independent red-team pass; apply abstention gates.
 8. Size with `trade-management-exits/scripts/trade_plan.py` or `scripts/position_sizer.py` for ordinary long cash positions; use the leveraged-product calculators for VİOP or warrants.
-9. Log actionable forecasts in the ledger. Return one clear action and the evidence that could change it.
+9. Log actionable forecasts in the ledger (`--thesis --kill --benchmark-price`; resolve later with `--lesson`). Return one clear action and the evidence that could change it.
 
 ## Reconsideration without anchoring
 
@@ -98,7 +104,7 @@ Before any `AL`, `SPEKÜLATİF AL` or `ARTIR` require the funnel's final gate: e
 
 ## Required short answer
 
-1. **Karar:** YENİ AL / SPEKÜLATİF AL / ARTIR / TUT / AZALT / SAT / İZLE / AKSİYON YOK (or `ADAY` for screen-grade names).
+1. **Karar:** YENİ AL / SPEKÜLATİF AL / ARTIR / TUT / AZALT / SAT / İZLE / KANIT BEKLE / YENİDEN DEĞERLENDİR / KORUMA / PAS / AKSİYON YOK (or `ADAY` for screen-grade names).
 2. **Vade, veri zamanı ve piyasa rejimi.**
 3. **Beklenti:** bear/base/bull ranges with probabilities and the most likely path; comparison with cash/deposit.
 4. **Risk:** maximum modeled loss, gap scenario, invalidation, what can go wrong.
@@ -121,7 +127,7 @@ Open only the module(s) the request needs and read the module file completely be
 
 | Module | Use when | File |
 |---|---|---|
-| `market-data-engine` | Fetch/scan BIST and macro data: snapshot of all stocks, histories with corporate-action repair, KAP feed, statements, horizon-aware multi-lane scan. | [MODULE.md](modules/market-data-engine/MODULE.md) |
+| `market-data-engine` | Fetch/scan BIST, US and macro data: snapshot of all stocks, histories with corporate-action repair, KAP feed, statements, TCMB rates/CPI, TEFAS funds, horizon-aware multi-lane scan. | [MODULE.md](modules/market-data-engine/MODULE.md) |
 | `equity-opportunity-funnel` | Search a broad stock universe and narrow it into recommendation-grade ideas. | [MODULE.md](modules/equity-opportunity-funnel/MODULE.md) |
 | `public-equity-research` | Recommendation-grade research on a named company: filings, earnings quality, valuation, what is priced in. | [MODULE.md](modules/public-equity-research/MODULE.md) |
 | `news-catalyst-intelligence` | KAP/news events, materiality, expectation gap, impact chain, catalyst calendar. | [MODULE.md](modules/news-catalyst-intelligence/MODULE.md) |
@@ -146,20 +152,21 @@ Open only the module(s) the request needs and read the module file completely be
 
 Supporting files (open only when the module points to them):
 
-- `market-data-engine`: [data-sources.md](modules/market-data-engine/references/data-sources.md), [scan-profiles.md](modules/market-data-engine/references/scan-profiles.md), [offline-and-chatgpt-mode.md](modules/market-data-engine/references/offline-and-chatgpt-mode.md); scripts: `bist_snapshot.py`, `price_history.py`, `bist_scan.py`, `kap_feed.py`, `financials_isy.py`, `macro_snapshot.py`, `map_export.py`, `common.py`
+- `market-data-engine`: [data-sources.md](modules/market-data-engine/references/data-sources.md), [scan-profiles.md](modules/market-data-engine/references/scan-profiles.md), [offline-and-chatgpt-mode.md](modules/market-data-engine/references/offline-and-chatgpt-mode.md); scripts: `bist_snapshot.py`, `price_history.py`, `bist_scan.py`, `kap_feed.py`, `financials_isy.py`, `macro_snapshot.py`, `tefas_funds.py`, `map_export.py`, `common.py`
 - `equity-opportunity-funnel`: [funnel-packet-schema.md](modules/equity-opportunity-funnel/references/funnel-packet-schema.md), [funnel-protocol.md](modules/equity-opportunity-funnel/references/funnel-protocol.md), [horizon-factors.md](modules/equity-opportunity-funnel/references/horizon-factors.md), [recommendation-gate.md](modules/equity-opportunity-funnel/references/recommendation-gate.md), [revision-protocol.md](modules/equity-opportunity-funnel/references/revision-protocol.md); scripts: `rank_universe.py`, `validate_funnel.py`
-- `public-equity-research`: [equity-research-protocol.md](modules/public-equity-research/references/equity-research-protocol.md), [valuation-turkey.md](modules/public-equity-research/references/valuation-turkey.md)
+- `public-equity-research`: [equity-research-protocol.md](modules/public-equity-research/references/equity-research-protocol.md), [valuation-turkey.md](modules/public-equity-research/references/valuation-turkey.md); scripts: `valuation_models.py`
 - `news-catalyst-intelligence`: [event-taxonomy.md](modules/news-catalyst-intelligence/references/event-taxonomy.md), [news-source-map.md](modules/news-catalyst-intelligence/references/news-source-map.md), [text-signal-rules.md](modules/news-catalyst-intelligence/references/text-signal-rules.md)
 - `investment-committee`: [investor-lenses.md](modules/investment-committee/references/investor-lenses.md), [debate-protocol.md](modules/investment-committee/references/debate-protocol.md)
-- `trade-management-exits`: [exit-playbook.md](modules/trade-management-exits/references/exit-playbook.md); scripts: `trade_plan.py`
+- `trade-management-exits`: [exit-playbook.md](modules/trade-management-exits/references/exit-playbook.md); scripts: `trade_plan.py`, `watchlist_monitor.py`
 - `bist-microstructure-flow`: [flow-signals.md](modules/bist-microstructure-flow/references/flow-signals.md), [manipulation-red-flags.md](modules/bist-microstructure-flow/references/manipulation-red-flags.md)
 - `quant-research-lab`: [research-protocol.md](modules/quant-research-lab/references/research-protocol.md), [pit-guard.md](modules/quant-research-lab/references/pit-guard.md), [walk-forward-protocol.md](modules/quant-research-lab/references/walk-forward-protocol.md), [cost-liquidity.md](modules/quant-research-lab/references/cost-liquidity.md), [backtest-audit.md](modules/quant-research-lab/references/backtest-audit.md); scripts: `walkforward_backtest.py`, `strategy_stats.py`, `cost_model.py`
 - `fund-etf-analyst`: [fund-analysis-protocol.md](modules/fund-etf-analyst/references/fund-analysis-protocol.md); scripts: `fund_metrics.py`
 - `turkey-markets-analysis`: [bist-equity.md](modules/turkey-markets-analysis/references/bist-equity.md), [bist-market-mechanics.md](modules/turkey-markets-analysis/references/bist-market-mechanics.md), [turkey-transmission-map.md](modules/turkey-markets-analysis/references/turkey-transmission-map.md), [leveraged-products.md](modules/turkey-markets-analysis/references/leveraged-products.md), [macro-regime.md](modules/turkey-markets-analysis/references/macro-regime.md), [tefas-funds.md](modules/turkey-markets-analysis/references/tefas-funds.md), [turkey-sources.md](modules/turkey-markets-analysis/references/turkey-sources.md); scripts: `fund_metrics.py`, `leveraged_scenarios.py`
 - `technical-quant-analysis`: [backtest-standard.md](modules/technical-quant-analysis/references/backtest-standard.md), [data-contract.md](modules/technical-quant-analysis/references/data-contract.md), [interpretation.md](modules/technical-quant-analysis/references/interpretation.md), [setups-playbook.md](modules/technical-quant-analysis/references/setups-playbook.md); scripts: `technical_indicators.py`, `backtest_audit.py`
 - `market-regime-analysis`: [regime-protocol.md](modules/market-regime-analysis/references/regime-protocol.md), [bist-regime-playbook.md](modules/market-regime-analysis/references/bist-regime-playbook.md); scripts: `bist_breadth.py`, `regime_features.py`
-- `probabilistic-market-forecast`: [calibration.md](modules/probabilistic-market-forecast/references/calibration.md), [forecast-method.md](modules/probabilistic-market-forecast/references/forecast-method.md), [multi-signal-ensemble.md](modules/probabilistic-market-forecast/references/multi-signal-ensemble.md), [abstention-gates.md](modules/probabilistic-market-forecast/references/abstention-gates.md); scripts: `forecast_ranges.py`, `forecast_ledger.py`, `score_forecasts.py`
-- `portfolio-risk-and-sizing`: [risk-sizing-protocol.md](modules/portfolio-risk-and-sizing/references/risk-sizing-protocol.md); scripts: `size_position.py`
+- `probabilistic-market-forecast`: [calibration.md](modules/probabilistic-market-forecast/references/calibration.md), [forecast-method.md](modules/probabilistic-market-forecast/references/forecast-method.md), [multi-signal-ensemble.md](modules/probabilistic-market-forecast/references/multi-signal-ensemble.md), [abstention-gates.md](modules/probabilistic-market-forecast/references/abstention-gates.md); scripts: `forecast_ranges.py`, `base_rates.py`, `forecast_ledger.py`, `score_forecasts.py`
+- `portfolio-risk-and-sizing`: [risk-sizing-protocol.md](modules/portfolio-risk-and-sizing/references/risk-sizing-protocol.md); scripts: `size_position.py`, `portfolio_builder.py`
+- Skill root scripts: `scripts/borsa.py` (all commands), `scripts/report_html.py` (HTML dashboard of a run), `scripts/position_sizer.py`
 - `pre-trade-investment-gate`: [gate-contract.md](modules/pre-trade-investment-gate/references/gate-contract.md); scripts: `validate_pretrade.py`
 - `investment-red-team`: [anti-anchoring-protocol.md](modules/investment-red-team/references/anti-anchoring-protocol.md), [red-team-checklist.md](modules/investment-red-team/references/red-team-checklist.md); scripts: `audit_packet.py`, `validate_challenge.py`
 - `investment-thesis-tracker`: [thesis-schema.md](modules/investment-thesis-tracker/references/thesis-schema.md)

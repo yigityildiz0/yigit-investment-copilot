@@ -136,8 +136,11 @@ def repair_corporate_actions(rows, events, is_bist):
     return list(reversed(log))
 
 
+MARKET = {"name": "turkey"}  # set from --market; decides the Yahoo suffix
+
+
 def fetch_one(code, out_dir, rng, interval, max_age_hours):
-    symbol = yahoo_symbol(code)
+    symbol = yahoo_symbol(code, MARKET["name"])
     name = safe_name(code.upper() if "." not in code else symbol)
     csv_path = out_dir / f"{name}.csv"
     if max_age_hours and csv_path.exists():
@@ -168,14 +171,15 @@ def fetch_one(code, out_dir, rng, interval, max_age_hours):
     return code, csv_path, "downloaded"
 
 
-def fetch_spark_batch(symbols, rng, interval):
-    """Close-only bulk history for up to 20 symbols per request (fast; no OHLC/volume/adjclose)."""
+def fetch_spark_batch(symbols, rng, interval, first_host=0):
+    """Close-only bulk history for up to 20 symbols per request (fast; no OHLC/volume/adjclose).
+    Yahoo latency is erratic (1-40 s for the same request), so parallel batches alternate hosts."""
     last_error = None
-    for host in HOSTS:
+    for host in HOSTS[first_host:] + HOSTS[:first_host]:
         url = (f"{host}/v7/finance/spark?symbols={','.join(symbols)}&range={rng}&interval={interval}"
                f"&indicators=close&includeTimestamps=true&includePrePost=false")
         try:
-            data = get_json(url, timeout=30, retries=1)
+            data = get_json(url, timeout=45, retries=1)
         except NetworkError as exc:
             last_error = exc
             continue
@@ -188,27 +192,33 @@ def fetch_spark_batch(symbols, rng, interval):
     raise last_error or NetworkError("spark: no data")
 
 
-def run_spark(codes, out_dir, rng="2y", interval="1d", max_age_hours=0):
+def run_spark(codes, out_dir, rng="2y", interval="1d", max_age_hours=0, workers=4):
     """Fast mode: close-only series (open/high/low set to close, volume 0) with the same
-    corporate-action repair. Enough for momentum, 52-week, trend and volatility features."""
+    corporate-action repair. Enough for momentum, 52-week, trend and volatility features.
+    Batches of 20 symbols run `workers` at a time (default 4; polite to the endpoint)."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     ok, failed, todo = {}, {}, []
     for code in codes:
-        name = safe_name(code.upper() if "." not in code else yahoo_symbol(code))
+        name = safe_name(code.upper() if "." not in code else yahoo_symbol(code, MARKET["name"]))
         path = out_dir / f"{name}.csv"
         if max_age_hours and path.exists() and (time.time() - path.stat().st_mtime) / 3600 <= max_age_hours:
             ok[code] = {"path": str(path), "status": "cached"}
         else:
-            todo.append((code, yahoo_symbol(code), name))
-    for start in range(0, len(todo), 20):
-        batch = todo[start:start + 20]
-        try:
-            responses = fetch_spark_batch([sym for _, sym, _ in batch], rng, interval)
-        except NetworkError as exc:
-            for code, _, _ in batch:
-                failed[code] = str(exc)
-            continue
+            todo.append((code, yahoo_symbol(code, MARKET["name"]), name))
+    batches = [todo[start:start + 20] for start in range(0, len(todo), 20)]
+    with ThreadPoolExecutor(max_workers=max(1, min(workers, 6))) as pool:
+        futures = {pool.submit(fetch_spark_batch, [sym for _, sym, _ in batch], rng, interval, k % len(HOSTS)): batch
+                   for k, batch in enumerate(batches)}
+        done = []
+        for future in as_completed(futures):
+            batch = futures[future]
+            try:
+                done.append((batch, future.result()))
+            except NetworkError as exc:
+                for code, _, _ in batch:
+                    failed[code] = str(exc)
+    for batch, responses in done:
         for code, sym, name in batch:
             response = responses.get(sym)
             if not response or not response.get("timestamp"):
@@ -265,8 +275,10 @@ def main():
     parser.add_argument("--max-age-hours", type=float, default=0, help="reuse existing CSVs younger than this")
     parser.add_argument("--mode", choices=["chart", "spark"], default="chart",
                         help="chart = full OHLCV per symbol (slower); spark = bulk close-only, ~20 symbols per request")
+    parser.add_argument("--market", default="turkey", help="turkey (CODE -> CODE.IS) or america (plain tickers)")
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
+    MARKET["name"] = args.market
     codes = list(args.codes)
     if args.tickers_file:
         codes += [line.strip() for line in args.tickers_file.read_text(encoding="utf-8").splitlines() if line.strip() and not line.startswith("#")]
@@ -275,7 +287,7 @@ def main():
         parser.error("give at least one code")
     out = args.out or default_out("history")
     if args.mode == "spark":
-        ok, failed = run_spark(codes, out, args.range, args.interval, args.max_age_hours)
+        ok, failed = run_spark(codes, out, args.range, args.interval, args.max_age_hours, min(args.workers, 4))
     else:
         ok, failed = run(codes, out, args.range, args.interval, args.workers, args.max_age_hours)
     print(f"OK {len(ok)} | FAILED {len(failed)} -> {out}")

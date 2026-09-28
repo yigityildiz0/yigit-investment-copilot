@@ -32,7 +32,15 @@ Plan contents that must be written down:
 
 ## Manage and exit (after entry)
 
-Apply the exit playbook in order: thesis break → stop → regime change → time stop → target/valuation → better opportunity → rebalancing/concentration. Record every exit with the reason in the journal. Adding: only to a position that is working (above entry, thesis intact), never averaging down on a losing trade unless it was planned as a staged value entry with a total loss cap.
+Apply the exit playbook in order: thesis break → stop → regime change → time stop → target/valuation → better opportunity → rebalancing/concentration. Record every exit with the reason in the journal.
+
+Monitor open positions and the watchlist from a CSV (`code,entry,stop,target1,target2,quantity,review_date,thesis`):
+
+```bash
+python scripts/watchlist_monitor.py --watchlist izle.csv --kap-days 3 --out izle
+```
+
+It flags stop breached or within 3%, targets reached, +1R (move the stop to break-even), close below SMA50/SMA200, sharp daily moves, earnings within 7 days, ex-dividend within 10 days, review date passed and new important or negative KAP disclosures, sorted by urgency with the plan action for each. The flags follow the user's written plan; they are not orders. Adding: only to a position that is working (above entry, thesis intact), never averaging down on a losing trade unless it was planned as a staged value entry with a total loss cap.
 
 ## BIST execution notes
 

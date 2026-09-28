@@ -8,8 +8,12 @@ detectable. Scoring reports quantile coverage, pinball loss, Brier scores and a 
 Commands:
   add      --ticker T --horizon-days H --price P --p10 --p50 --p90 [--target-price X --target-prob 0.3]
            [--loss-threshold 0.10 --loss-prob 0.2] [--action ADAY] [--model v2] [--note "..."]
-  resolve  --id ID --price P [--date YYYY-MM-DD]          outcome observed after the horizon
+           [--thesis "..."] [--kill "non-price kill condition"] [--benchmark-price XU100_level]
+  resolve  --id ID --price P [--date YYYY-MM-DD] [--benchmark-price B] [--lesson "what to do differently"]
+  note     --id ID --text "..."                          append-only note (never edit a forecast)
   due      [--today YYYY-MM-DD]                           forecasts past horizon without a resolution
+  history  [--ticker T] [--last 20] [--lessons-only]      past calls, outcomes, excess return and lessons:
+                                                          read this BEFORE a new analysis of the same name
   verify                                                  check the hash chain
   score    [--min-count 20]                               calibration report
 
@@ -65,7 +69,8 @@ def cmd_add(a):
            "price_at_issue": a.price, "p10": a.p10, "p50": a.p50, "p90": a.p90,
            "target_price": a.target_price, "target_prob": a.target_prob,
            "loss_threshold": a.loss_threshold, "loss_prob": a.loss_prob,
-           "action": a.action, "model": a.model, "note": a.note}
+           "action": a.action, "model": a.model, "note": a.note, "thesis": a.thesis, "kill_condition": a.kill,
+           "benchmark_price_at_issue": a.benchmark_price}
     print(json.dumps(append(a.ledger, rec), ensure_ascii=False, indent=2))
 
 
@@ -76,9 +81,65 @@ def cmd_resolve(a):
         raise SystemExit(f"no forecast {a.id}")
     if any(r["type"] == "resolution" and r["forecast_id"] == a.id for r in records):
         raise SystemExit("already resolved; append a note instead of re-resolving")
+    realized = a.price / fc["price_at_issue"] - 1
     rec = {"type": "resolution", "forecast_id": a.id, "resolved_at": now(), "outcome_date": a.date or date.today().isoformat(),
-           "outcome_price": a.price, "early": (a.date or date.today().isoformat()) < fc["maturity_date"]}
+           "outcome_price": a.price, "early": (a.date or date.today().isoformat()) < fc["maturity_date"],
+           "realized_return": round(realized, 6), "inside_p10_p90": fc["p10"] <= a.price <= fc["p90"],
+           "benchmark_price_at_outcome": a.benchmark_price, "lesson": a.lesson}
+    if a.benchmark_price and fc.get("benchmark_price_at_issue"):
+        rec["excess_return_vs_benchmark"] = round(realized - (a.benchmark_price / fc["benchmark_price_at_issue"] - 1), 6)
     print(json.dumps(append(a.ledger, rec), ensure_ascii=False, indent=2))
+
+
+def cmd_note(a):
+    records = read(a.ledger)
+    if not any(r["type"] == "forecast" and r["id"] == a.id for r in records):
+        raise SystemExit(f"no forecast {a.id}")
+    print(json.dumps(append(a.ledger, {"type": "note", "forecast_id": a.id, "noted_at": now(), "text": a.text}), ensure_ascii=False, indent=2))
+
+
+def cmd_history(a):
+    records = read(a.ledger)
+    res = {r["forecast_id"]: r for r in records if r["type"] == "resolution"}
+    notes = {}
+    for r in records:
+        if r["type"] == "note":
+            notes.setdefault(r["forecast_id"], []).append(r["text"])
+    fcs = [r for r in records if r["type"] == "forecast" and (not a.ticker or r["ticker"] == a.ticker.upper())][-a.last:]
+    if not fcs:
+        print("no forecasts" + (f" for {a.ticker.upper()}" if a.ticker else ""))
+        return
+    excess, inside, n_res = [], 0, 0
+    for fc in fcs:
+        r = res.get(fc["id"])
+        lesson = (r or {}).get("lesson")
+        if a.lessons_only:
+            if lesson or notes.get(fc["id"]):
+                print(f"- {fc['issued_at'][:10]} {fc['ticker']} ({fc.get('action')}): " + " | ".join(filter(None, [lesson] + notes.get(fc["id"], []))))
+            continue
+        line = (f"{fc['issued_at'][:10]} {fc['ticker']:<6} {fc.get('action', ''):<8} @ {fc['price_at_issue']} "
+                f"P10/P50/P90 {fc['p10']}/{fc['p50']}/{fc['p90']} vade {fc['maturity_date']}")
+        if r:
+            n_res += 1
+            inside += bool(r.get("inside_p10_p90"))
+            ex = r.get("excess_return_vs_benchmark")
+            if ex is not None:
+                excess.append(ex)
+            line += (f" -> {r['outcome_price']} ({(r.get('realized_return') or 0) * 100:+.1f}%"
+                     + (f", endekse göre {ex * 100:+.1f}%" if ex is not None else "") + f", aralık içinde: {r.get('inside_p10_p90')})")
+        else:
+            line += " -> açık"
+        print(line)
+        if fc.get("thesis"):
+            print(f"    tez: {fc['thesis']}" + (f" · iptal koşulu: {fc['kill_condition']}" if fc.get("kill_condition") else ""))
+        if lesson:
+            print(f"    ders: {lesson}")
+        for text in notes.get(fc["id"], []):
+            print(f"    not: {text}")
+    if not a.lessons_only and n_res:
+        print(f"{n_res} sonuçlanmış tahmin · P10–P90 içinde {inside}/{n_res}"
+              + (f" · ortalama endeks üstü getiri {sum(excess) / len(excess) * 100:+.1f}% (n={len(excess)})" if excess else ""))
+        print("Yeni analizden önce: aynı hatayı tekrarlamamak için dersleri ve kaçırılan riskleri oku; küçük örnek kesin sonuç değildir.")
 
 
 def cmd_due(a):
@@ -168,17 +229,30 @@ def main():
     p.add_argument("--action", default="ADAY")
     p.add_argument("--model", default="copilot-v2")
     p.add_argument("--note", default="")
+    p.add_argument("--thesis", default="")
+    p.add_argument("--kill", default="", help="non-price condition that kills the thesis")
+    p.add_argument("--benchmark-price", type=float, help="benchmark level at issue (e.g. XU100) for excess return")
     r = sub.add_parser("resolve")
     r.add_argument("--id", required=True)
     r.add_argument("--price", type=float, required=True)
     r.add_argument("--date")
+    r.add_argument("--benchmark-price", type=float, help="benchmark level at the outcome date")
+    r.add_argument("--lesson", default="", help="one-line lesson for future analyses of this name or setup")
+    n = sub.add_parser("note")
+    n.add_argument("--id", required=True)
+    n.add_argument("--text", required=True)
+    h = sub.add_parser("history")
+    h.add_argument("--ticker")
+    h.add_argument("--last", type=int, default=20)
+    h.add_argument("--lessons-only", action="store_true")
     d = sub.add_parser("due")
     d.add_argument("--today")
     sub.add_parser("verify")
     s = sub.add_parser("score")
     s.add_argument("--min-count", type=int, default=30)
     a = ap.parse_args()
-    {"add": cmd_add, "resolve": cmd_resolve, "due": cmd_due, "verify": cmd_verify, "score": cmd_score}[a.cmd](a)
+    {"add": cmd_add, "resolve": cmd_resolve, "note": cmd_note, "due": cmd_due, "history": cmd_history, "verify": cmd_verify,
+     "score": cmd_score}[a.cmd](a)
 
 
 if __name__ == "__main__":

@@ -169,13 +169,18 @@ def read_csv(path):
         return list(csv.DictReader(handle))
 
 
-def yahoo_symbol(code):
-    """Map a user code to a Yahoo Finance symbol. BIST codes get the .IS suffix."""
+def yahoo_symbol(code, market="turkey"):
+    """Map a user code to a Yahoo Finance symbol. BIST codes get the .IS suffix; for US codes a
+    share-class dot becomes a dash (BRK.B -> BRK-B)."""
     raw = code.strip()
     upper = raw.upper()
     if upper in YAHOO_ALIASES:
         return YAHOO_ALIASES[upper]
-    if any(mark in raw for mark in (".", "=", "^")):
+    if any(mark in raw for mark in ("=", "^")) or upper.endswith(".IS"):
+        return raw
+    if market != "turkey":
+        return upper.replace(".", "-").replace("/", "-")
+    if "." in raw:
         return raw
     return upper + ".IS"
 

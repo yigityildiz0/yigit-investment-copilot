@@ -1,0 +1,38 @@
+{
+  "name": "yigit-investment-copilot",
+  "description": "Investment research copilot for Borsa İstanbul, TEFAS and US stocks (skill + slash commands).",
+  "owner": {
+    "name": "yigityildiz0"
+  },
+  "metadata": {
+    "version": "2.1.0"
+  },
+  "plugins": [
+    {
+      "name": "borsa",
+      "description": "BIST / TEFAS / US-stock research copilot: whole-market scan, deep stock analysis, committee and red team, trade plans, fund screening, morning notes, portfolio risk. Research only; never places orders.",
+      "version": "2.1.0",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skill/yigit-investment-copilot"
+      ],
+      "commands": [
+        "./platforms/claude/plugin-commands/"
+      ],
+      "homepage": "https://github.com/yigityildiz0/yigit-investment-copilot",
+      "repository": "https://github.com/yigityildiz0/yigit-investment-copilot",
+      "license": "MIT",
+      "keywords": [
+        "finance",
+        "investing",
+        "stocks",
+        "borsa-istanbul",
+        "bist",
+        "tefas",
+        "turkey",
+        "research"
+      ]
+    }
+  ]
+}

@@ -6,6 +6,7 @@
 - Convert a USD cost of equity to TL with the inflation differential: `CoE_TL = (1 + CoE_USD) × (1 + π_TR) / (1 + π_US) − 1`.
 - USD cost of equity ≈ US risk-free rate + beta × mature-market equity premium + Türkiye country risk premium (sovereign default spread or CDS scaled by relative equity/bond volatility; Damodaran's method). Record the inputs and date.
 - Terminal growth in real terms should not exceed long-run real GDP growth; in nominal TL add expected long-run inflation consistently.
+- `python ../scripts/valuation_models.py coe --rf-usd <US10Y> --erp 5 --crp <CRP> --beta <β> --infl-try <expected π_TR> --infl-usd <π_US> --local-rf <TRY bond>` returns the USD, nominal TRY and real cost of equity with a bond-based cross-check (paths relative to this references folder; from the skill root use `modules/public-equity-research/scripts/valuation_models.py`).
 
 ## Reading TMS 29 statements
 
@@ -25,7 +26,7 @@
 
 ## Price-implied expectations (reverse DCF)
 
-Solve for the revenue growth, margin or ROE that the current price requires, then judge plausibility against history, peers and the macro path. A cheap multiple with an implausible implied decline can still be fair; an expensive one with credible growth can still be attractive.
+Solve for the revenue growth, margin or ROE that the current price requires, then judge plausibility against history, peers and the macro path. A cheap multiple with an implausible implied decline can still be fair; an expensive one with credible growth can still be attractive. Use `valuation_models.py reverse-dcf --price --shares --net-debt --cash0 --rate --terminal-growth --infl` (implied nominal and real growth) and `pb-roe --price --bvps` (implied sustainable ROE) for banks and asset-heavy firms.
 
 ## Cross-checks
 

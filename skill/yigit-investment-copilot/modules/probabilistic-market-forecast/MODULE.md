@@ -14,7 +14,7 @@ Read [references/forecast-method.md](references/forecast-method.md) and [referen
 1. Resolve instrument, venue, currency, current executable price, data timestamp, horizon and target event.
 2. For an open-ended “which stock has the best upside?” request, use `equity-opportunity-funnel` module first and forecast only the properly shortlisted finalists. Do not rank a few convenient tickers and imply a market-wide search.
 3. Obtain adjusted point-in-time history and enough observations for the horizon. Measure volatility, drawdowns, skew, gaps, liquidity and regime dependence.
-4. Run `scripts/forecast_ranges.py` for a transparent parametric range and, when a history CSV is available, empirical rolling-horizon base rates.
+4. Run `scripts/forecast_ranges.py` for a transparent parametric range and, when a history CSV is available, empirical rolling-horizon base rates. For the outside view of a setup across the whole universe run `scripts/base_rates.py --history-dir <histories> --horizon-days <h>` (or `python scripts/borsa.py taban --horizon <h>` from the skill root): forward-return distributions after trend-template, 52-week-high, breakout, momentum-decile, oversold-uptrend, 1-month-drop and limit-up-streak states versus the same-day baseline, by year, plus today's matches. Survivorship and overlap caveats are printed with the numbers.
 5. Add current information that a pure price model misses:
    - Fundamentals, valuation and what is priced in
    - Earnings, legal, policy, unlock or other dated catalysts
@@ -24,7 +24,7 @@ Read [references/forecast-method.md](references/forecast-method.md) and [referen
 6. Build bear, base and bull cases with conditional probabilities. Use an event mixture when a catalyst makes the return distribution discontinuous.
 7. Shrink uncertain drift toward zero or the relevant benchmark, especially at short horizons. Let volatility dominate when evidence for directional edge is weak.
 8. Compare candidates using probability-weighted return, probability of loss, tail loss, liquidity, catalyst and invalidation—not maximum theoretical upside alone.
-9. Record dated forecasts in the ledger (`scripts/forecast_ledger.py add`) and score them after maturity (`resolve`, `score`; `scripts/score_forecasts.py` still scores ad-hoc binary lists). Tighten or widen future confidence based on calibration; a model that does not beat the random-walk benchmark gets `restricted` or `abstain-only` status.
+9. Record dated forecasts in the ledger (`scripts/forecast_ledger.py add --thesis "..." --kill "..." --benchmark-price <XU100>`) and score them after maturity (`resolve --benchmark-price --lesson "..."`, `score`; `scripts/score_forecasts.py` still scores ad-hoc binary lists). Before re-analysing a name read `forecast_ledger.py history --ticker KOD` (past calls, excess return versus the index, lessons); `history --lessons-only` is the memory to carry into the next committee. Tighten or widen future confidence based on calibration; a model that does not beat the random-walk benchmark gets `restricted` or `abstain-only` status.
 
 ## Required forecast
 

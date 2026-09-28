@@ -13,6 +13,12 @@ powershell -ExecutionPolicy Bypass -File install/install.ps1 -Codex
 bash install/install.sh --codex
 ```
 
-3. Uygulamayı yeniden başlat. Skill'i `~/.codex/config.toml` içindeki `[[skills.config]]` ile açıp kapatabilirsin.
+3. Uygulamayı yeniden başlat. Skill istekle kendiliğinden seçilir; açıkça çağırmak için mesaja `$yigit-investment-copilot` yaz ya da `/skills` listesinden seç. Görünen ad, simge, renk ve varsayılan istem `agents/openai.yaml` dosyasındadır. Skill'i `~/.codex/config.toml` içindeki `[[skills.config]]` ile açıp kapatabilirsin.
 
-Burada betikler internete erişebildiği için tam BIST taraması, KAP akışı ve bilanço betikleri çalışır.
+Burada betikler internete erişebildiği için tam BIST ve S&P 500 taraması, KAP akışı, bilanço, TCMB faiz/TÜFE, TEFAS fon ve HTML pano komutları çalışır:
+
+```bash
+python scripts/borsa.py pipeline --horizon 3m
+python scripts/borsa.py brief
+python scripts/borsa.py fon screen --category "para piyasası"
+```

@@ -3,9 +3,11 @@
 #   bash install/install.sh --claude --opencode-extras
 #   bash install/install.sh --codex
 #   bash install/install.sh --opencode
+# --claude           skill into ~/.claude/skills + slash commands into ~/.claude/commands
+#                    (alternative: claude plugin marketplace add yigityildiz0/yigit-investment-copilot)
 # --opencode         skill + agent + commands into ~/.config/opencode
 # --opencode-extras  only agent + commands (skill already in ~/.claude/skills or ~/.agents/skills)
-# Existing installs are moved to <name>.bak-<timestamp>; nothing is deleted.
+# Existing installs (and same-name command files) are moved to <name>.bak-<timestamp>; nothing is deleted.
 set -euo pipefail
 NAME="yigit-investment-copilot"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -32,13 +34,28 @@ install_skill() {
   cp -R "$SRC" "$dst"
   echo "skill   -> $dst"
 }
-[ $CLAUDE -eq 1 ] && install_skill "$HOME/.claude/skills"
+install_files() {
+  local from="$1" to="$2"
+  mkdir -p "$to"
+  for f in "$from"/*.md; do
+    local dst="$to/$(basename "$f")"
+    if [ -e "$dst" ]; then
+      cmp -s "$f" "$dst" && continue
+      mv "$dst" "$dst.bak-$STAMP"
+    fi
+    cp "$f" "$dst"
+  done
+}
+if [ $CLAUDE -eq 1 ]; then
+  install_skill "$HOME/.claude/skills"
+  install_files "$ROOT/platforms/claude/commands" "$HOME/.claude/commands"
+  echo "claude commands -> $HOME/.claude/commands (/borsa-tara, /hisse-analiz, /sabah-bulteni ...)"
+fi
 [ $CODEX -eq 1 ] && install_skill "$HOME/.agents/skills"
 [ $OPENCODE -eq 1 ] && install_skill "$HOME/.config/opencode/skills"
 if [ $OPENCODE -eq 1 ] || [ $EXTRAS -eq 1 ]; then
-  mkdir -p "$HOME/.config/opencode/agents" "$HOME/.config/opencode/commands"
-  cp "$ROOT"/platforms/opencode/agents/*.md "$HOME/.config/opencode/agents/"
-  cp "$ROOT"/platforms/opencode/commands/*.md "$HOME/.config/opencode/commands/"
+  install_files "$ROOT/platforms/opencode/agents" "$HOME/.config/opencode/agents"
+  install_files "$ROOT/platforms/opencode/commands" "$HOME/.config/opencode/commands"
   echo "opencode agent + commands -> $HOME/.config/opencode"
 fi
 if [ $OPENCODE -eq 1 ] && [ $((CLAUDE + CODEX)) -gt 0 ]; then

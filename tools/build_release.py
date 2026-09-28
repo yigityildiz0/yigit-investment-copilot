@@ -5,11 +5,16 @@
   python tools/build_release.py                                                # validate + build dist/*.zip
   python tools/build_release.py --check                                        # validate only (CI)
 
+--refresh-from also copies the command and agent files from the master's `externals/` folder
+(two levels above the skill) into platforms/ and regenerates the Claude Code plugin commands and
+.claude-plugin/marketplace.json.
+
 Outputs in dist/:
-  yigit-investment-copilot-chatgpt.zip   skill folder at the ZIP root (ChatGPT Skills upload; also Codex)
-  yigit-investment-copilot-claude.zip    skill folder at the ZIP root, <=200-char description (claude.ai / Claude Code)
-  yigit-investment-copilot-opencode.zip  skills/ + agents/ + commands/ + INSTALL.md for ~/.config/opencode/
-  yigit-investment-copilot-all-in-one.zip  everything above + installers + docs
+  yigit-investment-copilot-chatgpt.zip       skill folder at the ZIP root (ChatGPT Skills upload; also Codex)
+  yigit-investment-copilot-claude.zip        skill folder at the ZIP root, <=200-char description (claude.ai upload)
+  yigit-investment-copilot-claude-code.zip   skills/ + commands/ + INSTALL.md for ~/.claude/ (manual Claude Code install)
+  yigit-investment-copilot-opencode.zip      skills/ + agents/ + commands/ + INSTALL.md for ~/.config/opencode/
+  yigit-investment-copilot-all-in-one.zip    everything above + installers + docs
   SHA256SUMS.txt
 """
 
@@ -24,17 +29,30 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NAME = "yigit-investment-copilot"
+VERSION = "2.1.0"
 SKILL = ROOT / "skill" / NAME
 DIST = ROOT / "dist"
-SHORT_DESCRIPTION = ("Investment copilot: scans all BIST, ranks by horizon, fundamental/technical/KAP/macro analysis, "
-                     "buy-sell-stop plans, backtests. Hisse/fon: ne alayım, satayım mı, kaç lot. Never trades.")
+PLATFORMS = ROOT / "platforms"
+PLUGIN_NAME = "borsa"
+SHORT_DESCRIPTION = ("Investment copilot: scans all BIST, TEFAS funds and US stocks by horizon; fundamental/technical/KAP/macro analysis, "
+                     "buy-sell-stop plans, portfolio risk. Hisse/fon: ne alayım, satayım mı. Never trades.")
+PLUGIN_DESCRIPTION = ("BIST / TEFAS / US-stock research copilot: whole-market scan, deep stock analysis, committee and red team, "
+                      "trade plans, fund screening, morning notes, portfolio risk. Research only; never places orders.")
+# local Claude Code / OpenCode command name -> short name inside the plugin (/borsa:<short>)
+PLUGIN_COMMANDS = {"borsa-tara": "tara", "hisse-analiz": "hisse", "hisse-sat": "sat", "piyasa": "piyasa",
+                   "strateji-test": "strateji", "sabah-bulteni": "bulten", "sektor": "sektor", "fon-tara": "fon",
+                   "portfoy-kur": "portfoy", "izle": "izle"}
 PUBLIC_REPLACEMENTS = [
     ("Yiğit's investment research and decision copilot", "Investment research and decision copilot"),
-    ("broker platforms such as İşCep/TradeMaster and others", "broker platforms and trading apps"),
-    ("İş Bankası product questions", "bank or broker product questions"),
-    ("Emri benim yerime İşCep'ten gir.", "Emri benim yerime aracı kurum uygulamasından gir."),
 ]
-PRIVATE_MARKERS = ["(Yiğit — private)", "İşCep", "İş Bankası", "TradeMaster", "Yiğit's investment"]
+PRIVATE_MARKERS = ["(Yiğit — private)", "Yiğit's investment"]
+# Owner-specific replacements and markers (e.g. personal bank or broker names) live in an untracked
+# local file so they are never published: {"replacements": [[old, new], ...], "markers": [...]}.
+LOCAL_TRANSFORMS = Path(__file__).with_name(".private-transforms.json")
+if LOCAL_TRANSFORMS.exists():
+    _local = json.loads(LOCAL_TRANSFORMS.read_text(encoding="utf-8"))
+    PUBLIC_REPLACEMENTS += [tuple(pair) for pair in _local.get("replacements", [])]
+    PRIVATE_MARKERS += list(_local.get("markers", []))
 PROFILE_TEMPLATE = """# Investor profile (fill in, optional)
 
 Use this file to give the copilot stable preferences. Keep it free of account numbers, balances, passwords
@@ -94,6 +112,70 @@ def refresh(master):
             path.write_bytes(new.encode("utf-8"))
     normalize_lf(SKILL)
     print(f"refreshed {SKILL.relative_to(ROOT)} from {master}")
+    externals = master.parents[1] / "externals"
+    if externals.exists():
+        copy_externals(externals)
+    generate_plugin()
+
+
+def public_text(text):
+    for old, rep in PUBLIC_REPLACEMENTS:
+        text = text.replace(old, rep)
+    return text.replace("\r\n", "\n")
+
+
+def copy_externals(externals):
+    """Commands and the OpenCode agent come from the master; only the investment-copilot files are copied."""
+    plan = [(externals / "opencode-agents" / "borsa-analist.md", PLATFORMS / "opencode" / "agents" / "borsa-analist.md")]
+    for name in PLUGIN_COMMANDS:
+        plan.append((externals / "opencode-commands" / f"{name}.md", PLATFORMS / "opencode" / "commands" / f"{name}.md"))
+        plan.append((externals / "claude-commands" / f"{name}.md", PLATFORMS / "claude" / "commands" / f"{name}.md"))
+    copied = 0
+    for src, dst in plan:
+        if src.exists():
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_bytes(public_text(src.read_text(encoding="utf-8")).encode("utf-8"))
+            copied += 1
+    print(f"copied {copied} command/agent files from {externals}")
+
+
+def generate_plugin():
+    """Claude Code plugin: the repo root is the plugin source (skills + short-named commands)."""
+    src_dir, out_dir = PLATFORMS / "claude" / "commands", PLATFORMS / "claude" / "plugin-commands"
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
+    out_dir.mkdir(parents=True)
+    for local, short in PLUGIN_COMMANDS.items():
+        src = src_dir / f"{local}.md"
+        if not src.exists():
+            continue
+        text = src.read_text(encoding="utf-8")
+        for other_local, other_short in PLUGIN_COMMANDS.items():
+            text = text.replace(f"/{other_local} ", f"/{PLUGIN_NAME}:{other_short} ").replace(f"/{other_local})", f"/{PLUGIN_NAME}:{other_short})")
+        (out_dir / f"{short}.md").write_bytes(text.encode("utf-8"))
+    marketplace = {
+        "name": NAME,
+        "description": "Investment research copilot for Borsa İstanbul, TEFAS and US stocks (skill + slash commands).",
+        "owner": {"name": "yigityildiz0"},
+        "metadata": {"version": VERSION},
+        "plugins": [{
+            "name": PLUGIN_NAME,
+            "description": PLUGIN_DESCRIPTION,
+            "version": VERSION,
+            "source": "./",
+            "strict": False,
+            "skills": [f"./skill/{NAME}"],
+            "commands": ["./platforms/claude/plugin-commands/"],
+            "homepage": f"https://github.com/yigityildiz0/{NAME}",
+            "repository": f"https://github.com/yigityildiz0/{NAME}",
+            "license": "MIT",
+            "keywords": ["finance", "investing", "stocks", "borsa-istanbul", "bist", "tefas", "turkey", "research"],
+        }],
+    }
+    (ROOT / ".claude-plugin").mkdir(exist_ok=True)
+    (ROOT / ".claude-plugin" / "marketplace.json").write_bytes(
+        (json.dumps(marketplace, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+    print(f"generated plugin '{PLUGIN_NAME}' ({len(list(out_dir.glob('*.md')))} commands) + .claude-plugin/marketplace.json")
 
 
 def validate():
@@ -139,6 +221,23 @@ def validate():
             compile(path.read_text(encoding="utf-8"), str(path), "exec")
         except SyntaxError as exc:
             problems.append(f"syntax {path.relative_to(SKILL)}: {exc}")
+    market = ROOT / ".claude-plugin" / "marketplace.json"
+    if market.exists():
+        try:
+            data = json.loads(market.read_text(encoding="utf-8"))
+            for entry in data.get("plugins", []):
+                for rel in entry.get("skills", []) + entry.get("commands", []):
+                    if not (ROOT / rel).exists():
+                        problems.append(f"marketplace path missing: {rel}")
+                if entry.get("version") != VERSION:
+                    problems.append(f"marketplace version {entry.get('version')} != {VERSION}")
+        except json.JSONDecodeError as exc:
+            problems.append(f"bad marketplace.json: {exc}")
+    for folder in (PLATFORMS / "claude" / "commands", PLATFORMS / "claude" / "plugin-commands", PLATFORMS / "opencode" / "commands"):
+        for md in folder.glob("*.md") if folder.exists() else []:
+            head = md.read_text(encoding="utf-8").split("---")
+            if len(head) < 3 or "description:" not in head[1]:
+                problems.append(f"command without frontmatter description: {md.relative_to(ROOT)}")
     return problems, len(files), len(desc)
 
 
@@ -178,6 +277,12 @@ def build():
     with zipfile.ZipFile(claude, "w", zipfile.ZIP_DEFLATED) as zf:
         zip_tree(zf, SKILL, NAME, lambda t: set_description(t, SHORT_DESCRIPTION))
     outputs.append(claude)
+    claude_code = DIST / f"{NAME}-claude-code.zip"
+    with zipfile.ZipFile(claude_code, "w", zipfile.ZIP_DEFLATED) as zf:
+        zip_tree(zf, SKILL, f"skills/{NAME}")
+        zip_tree(zf, PLATFORMS / "claude" / "commands", "commands")
+        zf.writestr("INSTALL.md", CLAUDE_CODE_INSTALL)
+    outputs.append(claude_code)
     opencode = DIST / f"{NAME}-opencode.zip"
     with zipfile.ZipFile(opencode, "w", zipfile.ZIP_DEFLATED) as zf:
         zip_tree(zf, SKILL, f"skills/{NAME}")
@@ -203,6 +308,26 @@ def build():
     (DIST / "SHA256SUMS.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
     for item in outputs:
         print(f"built {item.name} ({item.stat().st_size:,} bytes)")
+
+
+CLAUDE_CODE_INSTALL = """# Claude Code kurulumu / installation
+
+Önerilen yol (güncellemeleri otomatik alır) / recommended, auto-updating:
+
+    claude plugin marketplace add yigityildiz0/yigit-investment-copilot
+    claude plugin install borsa@yigit-investment-copilot
+
+Komutlar eklentide /borsa:tara, /borsa:hisse, /borsa:sat, /borsa:piyasa, /borsa:bulten, /borsa:sektor,
+/borsa:fon, /borsa:portfoy, /borsa:izle, /borsa:strateji olarak görünür.
+
+Elle kurulum / manual install (this ZIP):
+
+    skills/yigit-investment-copilot/  ->  ~/.claude/skills/yigit-investment-copilot/
+    commands/*.md                     ->  ~/.claude/commands/   (/borsa-tara, /hisse-analiz, /sabah-bulteni ...)
+
+Aynı anda hem eklentiyi hem elle kurulumu kullanma (skill iki kez yüklenir).
+Do not combine the plugin and the manual install (the skill would load twice). Python 3.9+ is required for the data scripts.
+"""
 
 
 def main():

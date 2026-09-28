@@ -120,6 +120,8 @@ def main():
     ap.add_argument("--usdtry", type=Path)
     ap.add_argument("--history-dir", type=Path)
     ap.add_argument("--universe", default="ALL", help="ALL or XU100 / XU030 membership column")
+    ap.add_argument("--market-label", default="BIST", help="title label, e.g. ABD for a US snapshot")
+    ap.add_argument("--index-name", default="XU100", help="index label used in the report")
     ap.add_argument("--out", type=Path, required=True)
     a = ap.parse_args()
 
@@ -172,7 +174,7 @@ def main():
         fx = {x["date"]: x["close"] for x in load_series(a.usdtry)}
         ser = [x["close"] / fx[x["date"]] for x in load_series(a.index) if x["date"] in fx]
         if len(ser) > 200:
-            usd = {"xu100_usd": ser[-1], "above_sma50": ser[-1] > sma(ser, 50), "above_sma200": ser[-1] > sma(ser, 200),
+            usd = {"index_usd": ser[-1], "above_sma50": ser[-1] > sma(ser, 50), "above_sma200": ser[-1] > sma(ser, 200),
                    "from_52w_high_pct": (ser[-1] / max(ser[-252:]) - 1) * 100}
 
     label, band, risk = "BELİRSİZ (endeks verisi yok)", None, None
@@ -199,13 +201,13 @@ def main():
     (a.out / "regime.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
     f = lambda x, d=1: "—" if x is None else (f"{x:,.{d}f}" if isinstance(x, (int, float)) else str(x))
-    lines = [f"# BIST piyasa rejimi — {idx.get('last_date', '?')}", "",
+    lines = [f"# {a.market_label} piyasa rejimi — {idx.get('last_date', '?')}", "",
              f"**Rejim:** {label} · **Plan içi hisse maruziyeti:** {band or '—'} · **İşlem başı risk ipucu:** {risk or '—'}", "",
              "## Endeks", "",
-             f"- XU100 {f(idx.get('close'))} · SMA50 {f(idx.get('sma50'))} · SMA200 {f(idx.get('sma200'))} · 52h zirveden {f(idx.get('from_52w_high_pct'))}%",
+             f"- {a.index_name} {f(idx.get('close'))} · SMA50 {f(idx.get('sma50'))} · SMA200 {f(idx.get('sma200'))} · 52h zirveden {f(idx.get('from_52w_high_pct'))}%",
              f"- Dağıtım günü (25 seans): {f(idx.get('distribution_days_25'), 0)} · düzeltme derinliği {f(idx.get('correction_depth_pct'))}% (dip {idx.get('correction_low_date', '—')}) · takip günü: {idx.get('follow_through_day') or 'yok'}",
              f"- Gerçekleşen oynaklık 20g {f(idx.get('realized_vol_20d_pct'))}% (1y yüzdelik {f(idx.get('vol_percentile_1y'))})",
-             f"- USD bazlı XU100: {f(usd.get('xu100_usd'), 2)} · SMA50 üstü {usd.get('above_sma50', '—')} · SMA200 üstü {usd.get('above_sma200', '—')} · 52h zirveden {f(usd.get('from_52w_high_pct'))}%",
+             f"- USD bazlı {a.index_name}: {f(usd.get('index_usd'), 2)} · SMA50 üstü {usd.get('above_sma50', '—')} · SMA200 üstü {usd.get('above_sma200', '—')} · 52h zirveden {f(usd.get('from_52w_high_pct'))}%",
              "", "## Genişlik", "",
              f"- {breadth['stocks']} hisse · SMA50 üstü %{f(breadth['pct_above_sma50'])} · SMA200 üstü %{f(breadth['pct_above_sma200'])} · SMA50>SMA200 %{f(breadth['pct_sma50_above_sma200'])}",
              f"- Bugün yükselen/düşen {breadth['advancers']}/{breadth['decliners']} · 52h zirveye %5 yakın %{f(breadth['pct_near_52w_high'])} · dibe yakın %{f(breadth['pct_near_52w_low'])}",

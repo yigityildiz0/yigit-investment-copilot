@@ -5,6 +5,8 @@
 
 # Market Regime Analysis
 
+`scripts/bist_breadth.py` also runs on a US snapshot (`--market-label ABD --index-name "S&P 500" --index SPX.csv`); `python scripts/borsa.py pipeline --market america` does this automatically.
+
 Own the cross-asset environment, not the final security recommendation. Use current primary data and distinguish measurement from interpretation.
 
 Read [references/regime-protocol.md](references/regime-protocol.md). For Borsa İstanbul read [references/bist-regime-playbook.md](references/bist-regime-playbook.md) and run `scripts/bist_breadth.py --snapshot snapshot.csv --index XU100.csv --usdtry USDTRY.csv --out regime` (or `python scripts/borsa.py regime` from the skill root) for breadth, sector rotation, distribution/follow-through days, USD-based trend and a heuristic exposure band. Use `scripts/regime_features.py` for transparent price/volatility features of any other dated series. Macro transmission for Türkiye: `../turkey-markets-analysis/references/turkey-transmission-map.md`.

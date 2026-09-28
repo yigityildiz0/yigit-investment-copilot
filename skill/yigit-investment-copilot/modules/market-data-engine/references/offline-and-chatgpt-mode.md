@@ -9,7 +9,8 @@ ChatGPT web/mobile and claude.ai run skill scripts in a sandbox that usually can
 3. Price action: for the 10–20 names that survive, open each stock's chart/quote page (e.g. TradingView symbol page, İş Yatırım company page) and record price, 52-week range and trend facts with time.
 4. Events: search `site:kap.org.tr <KOD>` and open the disclosures; read financial reports on KAP.
 5. Macro/regime: TCMB (policy rate, FX), TÜİK (CPI), Borsa İstanbul (index level); state the release dates.
-6. State coverage honestly (e.g. "480/626 hisse okundu"). A partial scan cannot support a "full-market best" claim.
+6. Funds: tefas.gov.tr "Fon Analiz" and "Getiri Karşılaştırma" pages (returns by period, fees, allocation, size) and the fund's KAP page; record the page date.
+7. State coverage honestly (e.g. "480/626 hisse okundu"). A partial scan cannot support a "full-market best" claim.
 
 ## Path 2 — user export + offline scripts (best in ChatGPT)
 
@@ -22,7 +23,7 @@ ChatGPT web/mobile and claude.ai run skill scripts in a sandbox that usually can
    python modules/market-data-engine/scripts/bist_scan.py --snapshot snap/snapshot.csv --horizon 3m --out scan
    ```
 3. If the user uploads a chart CSV (date, open, high, low, close, volume), run `technical-quant-analysis/scripts/technical_indicators.py` and `probabilistic-market-forecast/scripts/forecast_ranges.py` on it.
-4. Everything else (KAP reading, valuation, committee, red team, trade plan with `trade-management-exits/scripts/trade_plan.py`) works offline.
+4. Everything else works offline: KAP reading, valuation (`public-equity-research/scripts/valuation_models.py`), committee, red team, trade plan (`trade-management-exits/scripts/trade_plan.py`), portfolio risk on uploaded price CSVs (`portfolio-risk-and-sizing/scripts/portfolio_builder.py`), base rates on uploaded histories (`probabilistic-market-forecast/scripts/base_rates.py`) and the forecast ledger.
 
 ## Path 3 — connector
 

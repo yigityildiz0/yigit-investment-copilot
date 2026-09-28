@@ -9,6 +9,16 @@ Own product-level fund analysis. Use the user's language, explain unfamiliar ter
 
 Read [references/fund-analysis-protocol.md](references/fund-analysis-protocol.md). Use `scripts/fund_metrics.py` when dated NAV or adjusted-price data is available.
 
+For TEFAS products use the live data script (from the skill root; `borsa.py fon` wraps it):
+
+```bash
+python modules/market-data-engine/scripts/tefas_funds.py screen --category "para piyasası"   # peer-group leaders, cost, real return, flags
+python modules/market-data-engine/scripts/tefas_funds.py fund TTE --period 3y                # identity, fees, valör, allocation, NAV metrics
+python modules/market-data-engine/scripts/tefas_funds.py compare TTE IIH AFT --period 1y     # same-window metrics + return correlations
+```
+
+The screen ranks inside a peer group (umbrella type + risk band) by consistency across 3m/6m/1y/3y/5y and by cost; funds without a one-year record and qualified-investor (serbest) funds are kept out of the leader list by default. `fund KOD` writes `<KOD>_nav.csv`, which `fund_metrics.py` reads for benchmark-relative statistics.
+
 ## Workflow
 
 1. **Resolve identity.** Confirm full name, code/ISIN, share class, domicile, currency, founder/sponsor, manager, venue, distribution/accumulation policy, investor eligibility and whether the product is an open-end fund, ETF, closed-end fund or pension product.

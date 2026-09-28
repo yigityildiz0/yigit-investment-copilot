@@ -20,7 +20,13 @@ For an open-ended stock recommendation, minimum evidence also includes the scree
 - `AZALT`: concentration, valuation, catalyst, liquidity, or thesis risk is excessive.
 - `SAT`: thesis is broken or downside dominates after costs and alternatives.
 - `İZLE`: promising but price, timing, or evidence is not ready.
+- `KANIT BEKLE`: the thesis is attractive but one named, dated piece of evidence decides it (a filing, an order, a regulatory decision); state the evidence and the date, act only after it arrives.
+- `YENİDEN DEĞERLENDİR`: the thesis or the facts under it changed materially (earnings, management, capital structure, regulation); redo the work before adding or holding at full size.
+- `KORUMA`: keep the exposure but reduce one named risk (partial sale before an event, a hedge where the user has access, a tighter stop); state the retained risk.
+- `PAS`: not attractive now and not worth monitoring; say what would make it worth a second look.
 - `AKSİYON YOK`: identity is unresolved, no defensible edge exists, or an action would require fabricated inputs. Missing executable data alone should instead produce a conditional setup and finalization checklist.
+
+How to reach an action (seven PM questions, claim labels, valuation and risk standards): [pm-judgment-standard.md](pm-judgment-standard.md).
 
 ## Scenario requirements
 

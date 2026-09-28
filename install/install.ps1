@@ -8,9 +8,11 @@
   powershell -ExecutionPolicy Bypass -File install/install.ps1 -OpenCode
 
 .NOTES
+  -Claude          skill into ~/.claude/skills + slash commands into ~/.claude/commands
+                   (alternative: claude plugin marketplace add yigityildiz0/yigit-investment-copilot)
   -OpenCode        skill + agent + commands into ~/.config/opencode
   -OpenCodeExtras  only agent + commands (use when the skill is already in ~/.claude/skills or ~/.agents/skills)
-  Existing installs are renamed to <name>.bak-<timestamp> before copying. Nothing is deleted.
+  Existing installs (and same-name command files) are renamed to <name>.bak-<timestamp> before copying. Nothing is deleted.
 #>
 param(
   [switch]$Claude,
@@ -40,14 +42,29 @@ function Install-Skill([string]$TargetRoot) {
   Write-Host "skill   -> $Dst"
 }
 
-if ($Claude) { Install-Skill (Join-Path $HOME ".claude\skills") }
+function Install-Commands([string]$From, [string]$To) {
+  New-Item -ItemType Directory -Force $To | Out-Null
+  foreach ($f in Get-ChildItem (Join-Path $From "*.md")) {
+    $dst = Join-Path $To $f.Name
+    if (Test-Path $dst) {
+      if ((Get-FileHash $dst).Hash -eq (Get-FileHash $f.FullName).Hash) { continue }
+      Rename-Item -Path $dst -NewName "$($f.Name).bak-$Stamp"
+    }
+    Copy-Item $f.FullName $dst
+  }
+}
+
+if ($Claude) {
+  Install-Skill (Join-Path $HOME ".claude\skills")
+  Install-Commands (Join-Path $Root "platforms\claude\commands") (Join-Path $HOME ".claude\commands")
+  Write-Host "claude commands -> $(Join-Path $HOME '.claude\commands') (/borsa-tara, /hisse-analiz, /sabah-bulteni ...)"
+}
 if ($Codex) { Install-Skill (Join-Path $HOME ".agents\skills") }
 if ($OpenCode) { Install-Skill (Join-Path $HOME ".config\opencode\skills") }
 if ($OpenCode -or $OpenCodeExtras) {
   $Oc = Join-Path $HOME ".config\opencode"
-  New-Item -ItemType Directory -Force (Join-Path $Oc "agents"), (Join-Path $Oc "commands") | Out-Null
-  Copy-Item (Join-Path $Root "platforms\opencode\agents\*.md") (Join-Path $Oc "agents") -Force
-  Copy-Item (Join-Path $Root "platforms\opencode\commands\*.md") (Join-Path $Oc "commands") -Force
+  Install-Commands (Join-Path $Root "platforms\opencode\agents") (Join-Path $Oc "agents")
+  Install-Commands (Join-Path $Root "platforms\opencode\commands") (Join-Path $Oc "commands")
   Write-Host "opencode agent + commands -> $Oc"
 }
 if ($OpenCode -and ($Claude -or $Codex)) {

@@ -15,12 +15,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: Validate skill structure, links, privacy markers and syntax
+      - name: Validate skill structure, links, privacy markers, commands, marketplace and syntax
         run: python tools/build_release.py --check
       - name: Byte-compile every script
-        run: python -m compileall -q skill tools
-      - name: Offline smoke tests
-        run: |
-          python skill/yigit-investment-copilot/modules/trade-management-exits/scripts/trade_plan.py --entry 100 --atr 3 --capital 100000
-          python skill/yigit-investment-copilot/modules/quant-research-lab/scripts/cost_model.py --price 50 --order-try 100000 --adv-try 50000000 --capacity
-          python skill/yigit-investment-copilot/modules/probabilistic-market-forecast/scripts/forecast_ranges.py --current-price 100 --annualized-vol 0.4 --horizon-days 90 --target-price 115
+        run: python -m compileall -q skill tools tests
+      - name: Offline regression tests (synthetic data, no network)
+        run: python tests/run_tests.py

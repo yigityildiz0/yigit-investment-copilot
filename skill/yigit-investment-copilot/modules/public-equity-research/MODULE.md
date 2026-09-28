@@ -16,7 +16,7 @@ Read [references/equity-research-protocol.md](references/equity-research-protoco
 3. **Understand the business.** Map segments, customers, geography, revenue drivers, unit economics, pricing, cyclicality, competitive position, capital intensity, regulation and key dependencies.
 4. **Normalize financials.** Reconcile accounting basis, currency, consolidation, inflation treatment, fiscal periods, acquisitions/disposals, one-offs, stock compensation, leases, capitalized costs and continuing operations. Build revenue, margin, cash conversion, returns on capital, leverage and dilution trends.
 5. **Test earnings quality and balance sheet.** Compare profit with operating/free cash flow, working capital, capex, receivables/inventory, provisions, related parties, refinancing, covenants, pension/off-balance-sheet obligations and contingent liabilities.
-6. **Estimate what is priced in.** Use at least two compatible valuation frames—such as historical/peer multiples, reverse DCF, unit economics or asset value. Make assumptions visible, use scenario ranges and show the breakpoints that explain the current price.
+6. **Estimate what is priced in.** Use at least two compatible valuation frames—such as historical/peer multiples, reverse DCF, unit economics or asset value. Make assumptions visible, use scenario ranges and show the breakpoints that explain the current price. `scripts/valuation_models.py` computes them transparently: `coe` (USD CAPM + country risk, Fisher-converted to TRY), `dcf` (scenarios with probabilities and a WACC × terminal-growth grid), `reverse-dcf` (growth the price implies), `pb-roe` (justified P/B and the ROE the price implies), `rim` (residual income for banks and insurers) and `ddm`. Apply the valuation standard in `../../references/pm-judgment-standard.md` (anchor to price, bridge from consensus, rerating mechanism, mechanical downside, skew versus the hurdle).
 7. **Define thesis and variant.** State what consensus/price appears to assume, why the evidence differs, dated catalysts/recognition path, KPIs, strongest contradiction and hard kill criteria. Route persistent monitoring to `investment-thesis-tracker` module.
 8. **Add market context.** Use `technical-quant-analysis` module for timing, `market-regime-analysis` module for cross-asset context, and `probabilistic-market-forecast` module for outcome ranges. Use `turkey-markets-analysis` module for BIST/KAP/TMS 29/Türkiye rules.
 9. **Challenge and decide.** Compare a relevant peer/alternative and doing nothing, then run `investment-red-team` module. Use `portfolio-risk-and-sizing` module for allocation and `pre-trade-investment-gate` module if action is imminent.
@@ -28,6 +28,8 @@ Read [references/equity-research-protocol.md](references/equity-research-protoco
 - Do not mix periods, currencies, consolidated bases, reported/adjusted metrics or nominal/real figures silently.
 - Do not hide dilution, leverage, cyclicality, governance, liquidity or valuation sensitivity behind a narrative moat.
 - Do not convert a precise spreadsheet output into precise confidence; ranges must reflect model and evidence uncertainty.
+
+For earnings previews and reviews, sector notes and one-page memos use `../../references/report-templates.md`.
 
 ## Output
 

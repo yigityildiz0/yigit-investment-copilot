@@ -11,7 +11,8 @@ Own events. Price moves belong to `technical-quant-analysis`, valuation to `publ
 
 - KAP: `python ../market-data-engine/scripts/kap_feed.py --ticker KOD --days 90 --details 5 --out kap` (company) or `--all --days 3 --important-only` (market). Offline: `site:kap.org.tr KOD` and open the disclosure.
 - News: primary text first (KAP, company IR, regulator), then reputable outlets. Record the first public timestamp, not the article's update time.
-- Calendar: next earnings date (snapshot `earnings_next`), genel kurul and dividend dates (KAP), bonus/rights issue timetable, index rebalances (Borsa İstanbul), TCMB PPK, TÜİK CPI, FOMC/ECB, lock-up or supply events (`TIPE_DONUSUM`, pay satış bilgi formu).
+- Calendar: next earnings date (snapshot `earnings_next`), ex-dividend dates (snapshot `exdiv_next`), genel kurul and dividend dates (KAP), bonus/rights issue timetable, index rebalances (Borsa İstanbul), TCMB PPK, TÜİK CPI, FOMC/ECB, lock-up or supply events (`TIPE_DONUSUM`, pay satış bilgi formu).
+- Daily digest: `python ../../scripts/borsa.py brief --watchlist izle.csv` (paths from this module folder; from the skill root `python scripts/borsa.py brief`) collects regime, macro, one day of important KAP items, the week's earnings and ex-dividend dates, movers and watchlist triggers; write it up with the morning-note template in `../../references/report-templates.md`. Earnings previews and reviews use the same file.
 
 ## Analyse each material event
 

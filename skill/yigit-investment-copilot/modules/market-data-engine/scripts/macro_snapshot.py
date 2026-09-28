@@ -3,10 +3,12 @@
 
 Sources:
 - TCMB indicative exchange rates XML (official): https://www.tcmb.gov.tr/kurlar/today.xml
+- TCMB policy-rate pages (official HTML tables): one-week repo and overnight corridor. The tables list
+  only the dates on which a rate CHANGED; the latest row is the rate in force.
+- TCMB inflation page (official HTML table of TÜİK CPI): annual and monthly TÜFE change.
 - Yahoo Finance spark endpoint (unofficial, delayed): BIST indices, USD/TRY, EUR/TRY, gold, Brent,
   VIX, DXY, US 10-year yield, S&P 500, EM and Türkiye ETFs — one bulk request.
-Policy rate, CPI and CDS are NOT fetched here: take them from TCMB / TÜİK releases (or EVDS with the
-user's own API key) and cite the release date.
+CDS, deposit rates and bond yields are NOT fetched: take them from a cited source with its date.
 
 Usage:
   python macro_snapshot.py --out macro
@@ -14,6 +16,7 @@ Usage:
 
 import argparse
 import math
+import re
 import sys
 
 sys.dont_write_bytecode = True  # keep installed skill folders clean
@@ -23,6 +26,87 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import NetworkError, default_out, get_json, http, iso, md_table, now_trt, setup_stdout, write_json  # noqa: E402
+
+TCMB_PAGES = {
+    "policy": "https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Para+Politikasi/Merkez+Bankasi+Faiz+Oranlari/1+Hafta+Repo",
+    "corridor": "https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Temel+Faaliyetler/Para+Politikasi/Merkez+Bankasi+Faiz+Oranlari/faiz-oranlari",
+    "cpi": "https://www.tcmb.gov.tr/wps/wcm/connect/tr/tcmb+tr/main+menu/istatistikler/enflasyon+verileri",
+}
+
+
+def html_rows(url):
+    """All non-empty table rows of a TCMB page as lists of cell texts."""
+    html = http(url, headers={"Accept": "text/html", "Accept-Language": "tr-TR"}, timeout=30).decode("utf-8", "replace")
+    rows = []
+    for row in re.findall(r"<tr[^>]*>(.*?)</tr>", html, re.S):
+        cells = [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", c)).replace("&nbsp;", " ").strip()
+                 for c in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", row, re.S)]
+        if any(cells):
+            rows.append(cells)
+    return rows
+
+
+def _tcmb_date(text):
+    for fmt in ("%d.%m.%Y", "%d.%m.%y"):
+        try:
+            return datetime.strptime(text.strip(), fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
+def _num(text):
+    try:
+        return float(text.replace(",", "."))
+    except (AttributeError, ValueError):
+        return None
+
+
+def tcmb_rate_table(url):
+    """Latest (date, borrowing, lending) row of a TCMB rate-change table."""
+    changes = []
+    for cells in html_rows(url):
+        d = _tcmb_date(cells[0]) if cells else None
+        if d and len(cells) >= 3:
+            changes.append((d, _num(cells[1]), _num(cells[2])))
+    if not changes:
+        raise NetworkError("TCMB rate table not found")
+    changes.sort()
+    return changes
+
+
+def tcmb_policy():
+    repo = tcmb_rate_table(TCMB_PAGES["policy"])
+    d, _, lending = repo[-1]
+    prev = next((x for x in reversed(repo[:-1]) if x[2] != lending), None)
+    out = {"policy_rate_pct": lending, "policy_rate_since": d.isoformat(),
+           "previous_policy_rate_pct": prev[2] if prev else None, "previous_change": prev[0].isoformat() if prev else None,
+           "source": TCMB_PAGES["policy"], "note": "one-week repo auction rate; the table lists change dates only"}
+    try:
+        corridor = tcmb_rate_table(TCMB_PAGES["corridor"])
+        cd, borrow, lend = corridor[-1]
+        out.update({"overnight_borrowing_pct": borrow, "overnight_lending_pct": lend, "corridor_since": cd.isoformat()})
+    except NetworkError:
+        pass
+    return out
+
+
+def tcmb_cpi():
+    """Latest TÜFE annual/monthly change (TÜİK data as tabled by TCMB)."""
+    best = None
+    for cells in html_rows(TCMB_PAGES["cpi"]):
+        m = re.match(r"^(\d{2})-(\d{4})$", cells[0]) if cells else None
+        if m and len(cells) >= 3:
+            key = (int(m.group(2)), int(m.group(1)))
+            yoy, mom = _num(cells[1]), _num(cells[2])
+            if yoy is not None and (best is None or key > best[0]):
+                best = (key, yoy, mom)
+    if not best:
+        raise NetworkError("TCMB CPI table not found")
+    (year, month), yoy, mom = best
+    return {"period": f"{year}-{month:02d}", "cpi_yoy_pct": yoy, "cpi_mom_pct": mom,
+            "cpi_mom_annualized_pct": ((1 + mom / 100) ** 12 - 1) * 100 if mom is not None else None,
+            "source": TCMB_PAGES["cpi"]}
 
 SERIES = [
     ("XU100.IS", "BIST 100"), ("XU030.IS", "BIST 30"), ("XBANK.IS", "BIST Banka"), ("XUSIN.IS", "BIST Sınai"),
@@ -80,11 +164,20 @@ def ytd(series):
 
 
 def run(out_dir):
-    result = {"fetched_at": iso(now_trt()), "tcmb": None, "markets": [], "notes": []}
+    result = {"fetched_at": iso(now_trt()), "tcmb": None, "rates": {}, "markets": [], "notes": []}
     try:
         result["tcmb"] = tcmb()
     except (NetworkError, ET.ParseError) as exc:
         result["notes"].append(f"TCMB XML unavailable: {exc}")
+    for label, fn in (("policy", tcmb_policy), ("cpi", tcmb_cpi)):
+        try:
+            result["rates"].update(fn())
+        except NetworkError as exc:
+            result["notes"].append(f"TCMB {label} table unavailable: {exc}")
+    rates = result["rates"]
+    if rates.get("policy_rate_pct") is not None and rates.get("cpi_yoy_pct") is not None:
+        rates["real_policy_rate_ex_post_pct"] = ((1 + rates["policy_rate_pct"] / 100) / (1 + rates["cpi_yoy_pct"] / 100) - 1) * 100
+    rates.pop("source", None)
     data = spark([s for s, _ in SERIES])
     for sym, label in SERIES:
         series = data.get(sym) or []
@@ -112,20 +205,34 @@ def run(out_dir):
             "chg_ytd_pct": ytd(usd_series), "chg_1y_pct": change(usd_series, 365), "vol_60d_ann_pct": None,
             "from_52w_high_pct": (usd_series[-1][1] / max(c for _, c in usd_series[-252:]) - 1) * 100,
         })
-    result["notes"].append("Politika faizi, TÜFE, CDS ve mevduat faizi bu betikte yok: TCMB/TÜİK duyurularından tarihiyle alın.")
+    result["notes"].append("CDS, mevduat faizi ve tahvil getirileri bu betikte yok: tarihli bir kaynaktan alın.")
     out_dir = Path(out_dir)
     write_json(out_dir / "macro.json", result)
     view = [{"Gösterge": m["name"], "Son": m.get("last"), "Tarih": m.get("date"), "1H%": m.get("chg_1w_pct"), "1A%": m.get("chg_1m_pct"),
              "3A%": m.get("chg_3m_pct"), "YBB%": m.get("chg_ytd_pct"), "1Y%": m.get("chg_1y_pct"), "52hZirveden%": m.get("from_52w_high_pct")}
             for m in result["markets"] if "error" not in m]
     lines = [f"# Makro ve piyasalar — {result['fetched_at']}", ""]
+    if rates.get("policy_rate_pct") is not None or rates.get("cpi_yoy_pct") is not None:
+        parts = []
+        if rates.get("policy_rate_pct") is not None:
+            parts.append(f"politika faizi (1 hafta repo) %{rates['policy_rate_pct']:.2f} ({rates['policy_rate_since']} tarihinden beri"
+                         + (f"; önceki %{rates['previous_policy_rate_pct']:.2f}" if rates.get("previous_policy_rate_pct") is not None else "") + ")")
+        if rates.get("overnight_lending_pct") is not None:
+            parts.append(f"gecelik koridor %{rates['overnight_borrowing_pct']:.2f}–%{rates['overnight_lending_pct']:.2f}")
+        if rates.get("cpi_yoy_pct") is not None:
+            parts.append(f"TÜFE yıllık %{rates['cpi_yoy_pct']:.2f}, aylık %{rates['cpi_mom_pct']:.2f} ({rates['period']}; aylık yıllıklandırılmış %{rates['cpi_mom_annualized_pct']:.1f})")
+        if rates.get("real_policy_rate_ex_post_pct") is not None:
+            parts.append(f"geçmişe dönük reel politika faizi %{rates['real_policy_rate_ex_post_pct']:.1f}")
+        lines += ["TCMB: " + " · ".join(parts), ""]
     if result["tcmb"]:
         r = result["tcmb"]["rates"]
         lines.append(f"TCMB gösterge kurları ({result['tcmb']['bulletin_date']}, bülten {result['tcmb']['bulletin_no']}): "
                      + ", ".join(f"{k} alış {v['forex_buying']} / satış {v['forex_selling']}" for k, v in r.items() if k in ("USD", "EUR")))
         lines.append("")
     lines.append(md_table(view, list(view[0].keys())) if view else "(piyasa verisi yok)")
-    lines += ["", *[f"- {n}" for n in result["notes"]], "- Kaynak: TCMB (resmi) + Yahoo spark (resmi olmayan, gecikmeli)."]
+    lines += ["", *[f"- {n}" for n in result["notes"]],
+              "- Kaynak: TCMB (resmi: kur bülteni, faiz ve enflasyon tabloları) + Yahoo spark (resmi olmayan, gecikmeli).",
+              "- Faiz tablosu yalnız değişiklik tarihlerini listeler; son PPK kararını TCMB duyurusundan teyit et."]
     (out_dir / "macro.md").write_text("\n".join(lines), encoding="utf-8")
     return result
 
@@ -142,7 +249,11 @@ def main():
         print(f"ERROR: {exc}", file=sys.stderr)
         return 3
     ok = [m for m in result["markets"] if "error" not in m]
+    rates = result["rates"]
     print(f"OK {len(ok)}/{len(result['markets'])} series, TCMB {'ok' if result['tcmb'] else 'missing'} -> {out}")
+    if rates:
+        print(f"  policy {rates.get('policy_rate_pct')}% since {rates.get('policy_rate_since')} | CPI {rates.get('cpi_yoy_pct')}% ({rates.get('period')}) "
+              f"| real {rates.get('real_policy_rate_ex_post_pct') or 0:.1f}%")
     for m in ok[:6]:
         print(f"  {m['name']}: {m['last']:.4g} (1A {m['chg_1m_pct'] or 0:+.1f}%, 1Y {m['chg_1y_pct'] or 0:+.1f}%)")
     return 0

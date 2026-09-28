@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.1.0 — 2026-09-29
+
+A deep audit against official (Anthropic financial-services plugins, OpenAI public-equity standards) and popular independent finance-agent projects, then everything worth adopting, rebuilt for BIST.
+
+### Added
+- **Analyst expectations lane** in the scan (median target upside and consensus rating with ≥2 analysts, fresh EPS/revenue surprise within 75 days); value lane gains sales/EV, operating-cash-flow yield and positive PEG; new flags `HEDEF_USTU`, `ANALIST_ZAYIF`, `TEMETTU_YAKIN`. Snapshot now carries ~115 fields (targets, recommendations, surprises, ex-dividend dates, debt/cash, capex).
+- **US market mode**: `bist_snapshot.py --market america --universe SPX|NDX|DJI`, market-aware scan, histories and regime; `borsa.py pipeline --market america`.
+- **TEFAS fund engine** (`tefas_funds.py`): whole-market screen ranked inside peer groups (umbrella type + risk band) by multi-horizon consistency and cost, real returns, qualified-investor/TEFAS flags; single-fund pack (fees, valör, order hours, allocation, NAV metrics); same-window comparison with correlations.
+- **Macro**: TCMB policy rate and corridor, TÜFE annual/monthly and the ex-post real rate in `macro_snapshot.py`.
+- **Valuation models** (`valuation_models.py`): cost of equity (USD CAPM + country risk, Fisher to TRY), scenario DCF with a sensitivity grid, reverse DCF, justified P/B–ROE with implied ROE, residual income, dividend discount.
+- **Historical base rates** (`base_rates.py`): forward-return distributions after seven setups versus the same-day baseline, by year, with overlap-deflated t and today's matches; `borsa.py taban`.
+- **Portfolio builder** (`portfolio_builder.py`): equal-risk-contribution / inverse-volatility allocation with name and sector caps, risk contributions, correlation pairs, diversification ratio, VaR/ES, worst 20 days, beta, heat to stops; `borsa.py portfoy`.
+- **Watchlist monitor** (`watchlist_monitor.py`): positions and watchlist checked against written plans (stop, targets, +1R, trend, events, review date, KAP); `borsa.py izle`.
+- **Morning note and sector view**: `borsa.py brief` and `borsa.py sector`, with report templates (morning note, earnings preview/review, sector overview, idea generation incl. BIST special situations, one-page memo, numbers tie-out).
+- **Self-contained HTML dashboard** (`report_html.py`) for pipeline and single-stock runs: regime cards, lane bars, SVG price charts with plan levels and the P10–P90 band, light/dark themes.
+- **PM judgment standard**: seven portfolio-manager questions, claim labels, valuation and risk standards; new actions `KANIT BEKLE`, `YENİDEN DEĞERLENDİR`, `KORUMA`, `PAS`; new investor lenses (Burry, Pabrai, Jhunjhunwala, Ackman, Wood).
+- **Forecast memory**: ledger entries carry thesis, kill condition and benchmark level; resolutions record excess return and a lesson; `history` and `note` commands.
+- **Claude Code plugin** (`.claude-plugin/marketplace.json`, plugin `borsa` with ten `/borsa:*` commands), unprefixed Claude Code commands, five more OpenCode commands (`/sabah-bulteni`, `/sektor`, `/fon-tara`, `/portfoy-kur`, `/izle`), Codex `agents/openai.yaml`, twelve golden prompts, eleven offline regression tests and a `claude-code` release package.
+
+### Changed
+- Profile weights rebalanced for the expectations lane; missing analyst coverage counts as neutral.
+- Bulk price downloads run four batches in parallel on alternating hosts (full S&P 500 in ~2.5 minutes instead of timing out).
+- Installers also place Claude Code commands and back up same-name files instead of overwriting them.
+
 ## 2.0.0 — 2026-09-28
 
 The second generation of the finance skills from [universal-ai-finance-skills](https://github.com/yigityildiz0/universal-ai-finance-skills) (17 separate skills), rebuilt as one routed copilot with a live data engine.
