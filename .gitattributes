@@ -1,3 +1,9 @@
 * text=auto eol=lf
 *.zip binary
 *.png binary
+
+# CURRENT PROVIDER PAYLOAD BYTES
+# Packages and checked-out provider sources must have identical bytes on every OS.
+skills/common/yigit-investment-copilot/** -text
+skills/codex/yigit-investment-copilot/** -text
+skills/claude/yigit-investment-copilot/** -text
