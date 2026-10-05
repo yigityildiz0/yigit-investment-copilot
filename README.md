@@ -1,3 +1,34 @@
+<!-- CURRENT-SKILL-PUBLICATION -->
+![Investment Copilot](assets/collection-hero.svg)
+
+# Investment Copilot
+
+Evidence-led BIST, TEFAS and US-equity research. This **1 workflow** help the assistant select tools, check evidence and produce reviewable results. They do not change model weights or guarantee better decisions.
+
+[![Download ChatGPT](https://img.shields.io/badge/ChatGPT-Download_ZIP-10a37f?style=for-the-badge)](https://github.com/yigityildiz0/yigit-investment-copilot/raw/refs/heads/main/downloads/ChatGPT.zip) [![Download Claude](https://img.shields.io/badge/Claude-Download_ZIP-d97757?style=for-the-badge)](https://github.com/yigityildiz0/yigit-investment-copilot/raw/refs/heads/main/downloads/Claude.zip)
+
+**ChatGPT:** the button downloads a plugin with all listed skills and supporting files. Use the personal-plugin/skill import supported by your account. A single-skill ChatGPT button downloads a one-skill plugin. **Claude:** unpack the collection ZIP, then upload its individual skill ZIPs; the outer collection is not a single Claude skill. Local Codex/Claude Code files and cloud-account installation are separate.
+
+Use natural English or Turkish requests. A slash-prefixed word typed in chat does not register a host command. Explicit local skill invocation uses the canonical skill name; available tools, network access and credentials remain host-dependent.
+
+## Included skills
+
+| Skill | What it solves / example request | ChatGPT | Claude |
+|---|---|---|---|
+| [`yigit-investment-copilot`](skills/common/yigit-investment-copilot/SKILL.md) | Research BIST, TEFAS, US equities and portfolio risk; never place orders | [↓ ZIP](packages/chatgpt/yigit-investment-copilot.zip) | [↓ ZIP](packages/claude/yigit-investment-copilot.zip) |
+
+## Installation and technical boundaries
+
+- Full canonical sources: `skills/common/`; provider packages: `packages/chatgpt/`, `packages/claude/`, `packages/codex/`.
+- Every Claude skill has at most 200 files and a description of at most 200 characters. ZIPs include all files of the selected provider source.
+- External services (Gemini, Parallel, Context7), local CLIs and subscriptions are not provided by these ZIPs. Report missing tools rather than simulating access.
+- Validation checks package integrity, paths, descriptions, source/package parity and hashes. It is not a live account-installation test or a clinical/financial effectiveness claim.
+- See [checksums](downloads/SHA256SUMS.txt), [provenance](PUBLICATION.md), and [third-party notices](THIRD_PARTY_NOTICES.md). Existing license and copyright files retain their scope; there is no blanket license grant over third-party content.
+
+Research and education only: no autonomous orders, credential handling or return guarantees. / Araştırma ve eğitim; otomatik emir göndermez, getiri garanti etmez.
+
+<!-- END-CURRENT-SKILL-PUBLICATION -->
+
 <p align="center">
   <img src="assets/banner.svg" alt="Yiğit Investment Copilot — Borsa İstanbul için yapay zekâ araştırma masası" width="100%">
 </p>
@@ -27,12 +58,12 @@ Her platform için hazır paket (her zaman son sürümü indirir):
 
 | Platform | Paket | Nereye? |
 |---|---|---|
-| **ChatGPT** (web / mobil / masaüstü) | [**yigit-investment-copilot-chatgpt.zip**](https://github.com/yigityildiz0/yigit-investment-copilot/releases/latest/download/yigit-investment-copilot-chatgpt.zip) | ChatGPT → Skills → Create → Upload |
+| **ChatGPT** (web / mobil / masaüstü) | [**yigit-investment-copilot-chatgpt.zip**](https://github.com/yigityildiz0/yigit-investment-copilot/releases/latest/download/yigit-investment-copilot-chatgpt.zip) | Current ChatGPT plugin: use the ChatGPT download above; account import varies |
 | **claude.ai** (web / masaüstü / mobil) | [**yigit-investment-copilot-claude.zip**](https://github.com/yigityildiz0/yigit-investment-copilot/releases/latest/download/yigit-investment-copilot-claude.zip) | Customize → Skills → Upload |
 | **Claude Code** (önerilen: eklenti) | `claude plugin marketplace add yigityildiz0/yigit-investment-copilot` → `claude plugin install borsa@yigit-investment-copilot` | Otomatik güncellenir; komutlar `/borsa:tara`… |
 | **Claude Code** (elle) | [**yigit-investment-copilot-claude-code.zip**](https://github.com/yigityildiz0/yigit-investment-copilot/releases/latest/download/yigit-investment-copilot-claude-code.zip) | `~/.claude/skills/` + `~/.claude/commands/` |
 | **OpenCode** | [**yigit-investment-copilot-opencode.zip**](https://github.com/yigityildiz0/yigit-investment-copilot/releases/latest/download/yigit-investment-copilot-opencode.zip) | `~/.config/opencode/` (skill + ajan + komutlar) |
-| **Codex CLI / ChatGPT masaüstü** | ChatGPT paketi ile aynı | `~/.agents/skills/` |
+| **Codex CLI / ChatGPT masaüstü** | `packages/codex/yigit-investment-copilot.zip` | `~/.agents/skills/` |
 | **Hepsi bir arada** | [**yigit-investment-copilot-all-in-one.zip**](https://github.com/yigityildiz0/yigit-investment-copilot/releases/latest/download/yigit-investment-copilot-all-in-one.zip) | Tüm paketler + kurulum betikleri + belgeler |
 
 Bütünlük kontrolü: [SHA256SUMS.txt](https://github.com/yigityildiz0/yigit-investment-copilot/releases/latest/download/SHA256SUMS.txt) · Tüm sürümler: [Releases](https://github.com/yigityildiz0/yigit-investment-copilot/releases)

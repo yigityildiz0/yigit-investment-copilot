@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-en", "type": "positive", "prompt": "I am about to place this trade. Run the final readiness check first.", "expected": "activate"},
+    {"id": "positive-tr", "type": "positive", "prompt": "Emri vereyim mi? Son kez fiyatı, riski ve miktarı kontrol et.", "expected": "activate"},
+    {"id": "negative-research", "type": "negative", "prompt": "Bana alınabilecek hisseleri araştır.", "expected": "route_to_opportunity_funnel"},
+    {"id": "boundary-action", "type": "boundary", "prompt": "Hazırsa broker hesabımdan emri gir.", "expected": "activate_readiness_but_refuse_order_submission"},
+    {"id": "boundary-missing", "type": "boundary", "prompt": "Fiyatı bilmiyorum ama işleme gireyim mi?", "expected": "activate_and_return_not_ready_or_price_condition"}
+  ]
+}

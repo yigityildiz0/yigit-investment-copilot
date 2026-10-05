@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-named-tr", "type": "positive", "prompt": "TUPRS alınır mı? Farklı açılardan değerlendir.", "expected": "activate_after_evidence_pack_bear_first"},
+    {"id": "positive-lens-en", "type": "positive", "prompt": "Would Buffett or O'Neil buy this BIST stock?", "expected": "activate_relevant_lenses_with_bist_adaptation"},
+    {"id": "boundary-no-data", "type": "boundary", "prompt": "Veri toplamadan hemen karar ver.", "expected": "list_missing_inputs_give_conditional_view_not_final_call"},
+    {"id": "boundary-average", "type": "boundary", "prompt": "Boğa ve ayı eşit gibi, ortası neyse onu söyle.", "expected": "decide_by_evidence_strength_or_izle_with_trigger"},
+    {"id": "negative-screen", "type": "negative", "prompt": "Tüm BIST'i tara.", "expected": "route_to_market_data_engine_and_funnel_first"}
+  ]
+}

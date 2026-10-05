@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-en", "type": "positive", "prompt": "Compare these call warrants by expiry, strike, spread, theta, and total-loss probability.", "expected": "activate"},
+    {"id": "positive-tr", "type": "positive", "prompt": "Dayanak yüzde 10 yükselirse bu varant ne olur, kaç adet mantıklı?", "expected": "activate_with_underlying_forecast_and_verified_quote"},
+    {"id": "negative-equity", "type": "negative", "prompt": "Bu hisse yüzde 10 yükselir mi?", "expected": "route_to_probabilistic_market_forecast"},
+    {"id": "boundary-identity", "type": "boundary", "prompt": "Şu ekran görüntüsündeki varantı alayım mı?", "expected": "activate_but_require_independent_identity_and_product_document"},
+    {"id": "boundary-nonvanilla", "type": "boundary", "prompt": "Turbo sertifikanın fiyatını Black-Scholes ile hesapla.", "expected": "activate_and_reject_vanilla_model_until_payoff_is_verified"}
+  ]
+}

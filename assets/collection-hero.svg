@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="380" viewBox="0 0 1280 380" role="img" aria-labelledby="title desc">
+<title id="title">Investment Copilot</title><desc id="desc">Evidence-led BIST, TEFAS and US-equity research. 1 documented workflows, separate ChatGPT and Claude packages.</desc>
+<defs><linearGradient id="bg"><stop stop-color="#081526"/><stop offset="1" stop-color="#10283d"/></linearGradient></defs>
+<rect width="1280" height="380" rx="24" fill="url(#bg)"/><g font-family="Segoe UI,Arial,sans-serif"><text x="54" y="100" font-size="44" font-weight="700" fill="#eef5ff">Investment Copilot</text>
+<text x="56" y="235" font-size="20" fill="#b7c9de">Evidence-led BIST, TEFAS and US-equity research</text>
+<rect x="54" y="275" width="485" height="52" rx="12" fill="#133f4a"/><text x="76" y="308" font-size="18" fill="#7de9d2">1 workflows · EN / TR · host-specific ZIPs</text>
+<g stroke="#68cce0" stroke-width="3" fill="none" opacity=".75"><path d="M900 84L1110 144L968 266L1158 294M900 84L968 266M1110 144L1158 294"/></g>
+<g fill="#1b5265" stroke="#7de9d2" stroke-width="3"><circle cx="900" cy="84" r="23"/><circle cx="1110" cy="144" r="33"/><circle cx="968" cy="266" r="29"/><circle cx="1158" cy="294" r="19"/></g>
+<text x="871" y="344" font-size="16" fill="#b7c9de">Question → Sources → Decision</text></g></svg>

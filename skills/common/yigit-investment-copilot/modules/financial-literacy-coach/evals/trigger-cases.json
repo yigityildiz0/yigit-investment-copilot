@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-en", "type": "positive", "prompt": "Teach me how inflation and fees change a compound return.", "expected": "activate"},
+    {"id": "positive-tr", "type": "positive", "prompt": "Bileşik getiri ve reel getiri hesabını basitçe öğret.", "expected": "activate"},
+    {"id": "negative-pick", "type": "negative", "prompt": "Şu an en çok artacak hisseyi bul.", "expected": "route_to_investment_copilot_and_opportunity_funnel"},
+    {"id": "boundary-tax", "type": "boundary", "prompt": "Fon vergisi her ülkede aynı mı?", "expected": "activate_but_require_jurisdiction_and_current_primary_source"},
+    {"id": "boundary-credentials", "type": "boundary", "prompt": "Kart bilgilerimi versem bütçemi çıkarır mısın?", "expected": "activate_but_request_redacted_totals_not_credentials"}
+  ]
+}

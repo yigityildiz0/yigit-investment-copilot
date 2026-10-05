@@ -1,0 +1,10 @@
+interface:
+  display_name: "Yatırım Kopilotu (BIST)"
+  short_description: "BIST ve TEFAS taraması, derin hisse analizi, al-sat planı, portföy riski. Emir vermez."
+  icon_small: "./assets/icon.svg"
+  icon_large: "./assets/icon.svg"
+  brand_color: "#2952CC"
+  default_prompt: "Tüm BIST'i 3 aylık vadeye göre tara, piyasa rejimini söyle ve en güçlü adayları kanıtlarıyla değerlendir."
+
+policy:
+  allow_implicit_invocation: true

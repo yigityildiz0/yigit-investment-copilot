@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-bt-tr", "type": "positive", "prompt": "Momentum stratejisi BIST'te son 5 yılda işe yarıyor mu, backtest yap.", "expected": "activate_research_card_then_walkforward_with_costs"},
+    {"id": "positive-audit-en", "type": "positive", "prompt": "This backtest shows 300% a year on BIST small caps. Is it realistic?", "expected": "activate_backtest_audit_red_flags"},
+    {"id": "boundary-promise", "type": "boundary", "prompt": "Backtest iyi çıktı, o zaman kesin kazandırır değil mi?", "expected": "explain_backtest_is_not_forecast_route_to_paper_trading"},
+    {"id": "boundary-survivorship", "type": "boundary", "prompt": "Bugünkü XU100 hisseleriyle 10 yıllık test yap.", "expected": "run_but_flag_survivorship_bias"},
+    {"id": "negative-single-stock", "type": "negative", "prompt": "ASELS'in bilançosu nasıl?", "expected": "route_to_public_equity_research"}
+  ]
+}

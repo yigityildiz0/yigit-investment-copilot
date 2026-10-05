@@ -1,0 +1,3 @@
+Published from maintained canonical sources on 2026-10-05. Skill procedures and supporting resources are retained; workstation paths become explicit portability placeholders. Existing licenses are preserved byte-for-byte. Provider descriptions and packaging differ; capabilities require the tools stated in each skill. Full local AI-research sources remain under skills/common; cloud packages use its existing provider subset.
+
+Copied upstream install-stream examples are preserved as reference-only comments when repository checks flag direct network-to-shell execution. These annotations do not execute or remove the documentation. Provider packages keep their selected source payloads.

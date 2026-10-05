@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "release_date": "2026-10-05",
+  "slug": "yigit-investment-copilot",
+  "skills": [
+    "yigit-investment-copilot"
+  ],
+  "provider_sets_equal": true,
+  "source_counts": {
+    "yigit-investment-copilot": {
+      "common": 142,
+      "GPT": 142,
+      "Claude": 142
+    }
+  },
+  "account_installation_tested": false,
+  "files": {
+    "downloads/ChatGPT.zip": "593722bf636d9d09af366b17d7e7e0fe5ff91122369f369d01cb3abf91d8e066",
+    "downloads/Claude.zip": "95d8c8e61684d7648dcccfc509230ee7496c104f1f4146fb0fefbcfc923f26c8",
+    "packages/chatgpt/yigit-investment-copilot.zip": "cedb9803f47ab50cb9e57a2d9e5338acac34dc008546af27665cb61cbc30b8a0",
+    "packages/claude/yigit-investment-copilot.zip": "508c915512c49e261530a3dc636c704456250f47420a61e631b512c7525588a4",
+    "packages/codex/yigit-investment-copilot.zip": "be9df6dd8942ed49a4866102f28003bd3d26fefe553ff74bae242e9821cef86a",
+    "packages/common/yigit-investment-copilot.zip": "be9df6dd8942ed49a4866102f28003bd3d26fefe553ff74bae242e9821cef86a"
+  }
+}

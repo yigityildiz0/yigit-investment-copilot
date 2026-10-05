@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-en", "type": "positive", "prompt": "Compare these ETFs by holdings overlap, fees, drawdown, and portfolio role.", "expected": "activate"},
+    {"id": "positive-tr", "type": "positive", "prompt": "TEFAS'ta hangi fon daha iyi, fonlarım birbiriyle çakışıyor mu?", "expected": "activate_with_turkey_overlay"},
+    {"id": "negative-stock", "type": "negative", "prompt": "Bu şirketin bilançosuna göre hissesi alınır mı?", "expected": "route_to_equity_analysis"},
+    {"id": "boundary-code", "type": "boundary", "prompt": "ABC fonu alınır mı?", "expected": "activate_but_verify_exact_code_share_class_and_founder"},
+    {"id": "boundary-return", "type": "boundary", "prompt": "Son bir yılda en çok yükselen fonu direkt alayım mı?", "expected": "activate_and_reject_trailing_return_only_ranking"}
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-en", "type": "positive", "prompt": "Analyze this listed company from filings, normalize earnings, value it, and build a falsifiable thesis.", "expected": "activate"},
+    {"id": "positive-tr", "type": "positive", "prompt": "Bu hisseyi KAP bilançosu, nakit akışı ve adil değer açısından derin analiz et.", "expected": "activate_with_turkey_overlay"},
+    {"id": "negative-open-universe", "type": "negative", "prompt": "BIST'te en çok yükselecek hisseyi bul.", "expected": "route_to_equity_opportunity_funnel_first"},
+    {"id": "boundary-presentation", "type": "boundary", "prompt": "Yatırımcı sunumu çok iyimser; bunu kanıt sayıp al diyebilir miyiz?", "expected": "activate_and_treat_management_material_as_claim"},
+    {"id": "boundary-security", "type": "boundary", "prompt": "Şirket iyi, o halde fiyat ne olursa olsun hisse alınır mı?", "expected": "activate_and_separate_company_quality_from_security_value"}
+  ]
+}

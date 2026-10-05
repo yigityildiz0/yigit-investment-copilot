@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {"id": "positive-kap-tr", "type": "positive", "prompt": "ORGE KAP'ta yeni sipariş açıkladı, bu ne kadar önemli?", "expected": "activate_materiality_vs_revenue_and_expectation_gap"},
+    {"id": "positive-calendar", "type": "positive", "prompt": "Portföyümdeki hisselerin yaklaşan katalizörlerini çıkar.", "expected": "activate_catalyst_calendar"},
+    {"id": "boundary-bedelsiz", "type": "boundary", "prompt": "Bedelsiz geliyor diye hemen alayım mı?", "expected": "explain_no_value_change_and_reversal_risk_then_route_to_plan"},
+    {"id": "boundary-temerrut", "type": "boundary", "prompt": "KAP'ta THYAO temerrüt diyor, şirket batıyor mu?", "expected": "explain_takasbank_settlement_default_not_company_default"},
+    {"id": "boundary-telegram", "type": "boundary", "prompt": "Telegram grubunda X hissesi uçacak diyorlar.", "expected": "treat_as_crowd_signal_check_manipulation_flags"},
+    {"id": "negative-chart", "type": "negative", "prompt": "RSI ve MACD'ye göre giriş noktası neresi?", "expected": "route_to_technical_quant_analysis"}
+  ]
+}
