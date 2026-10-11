@@ -6,4 +6,4 @@ Use README and DOWNLOADS for the current edition. Old tags/downloads may contain
 
 Türkçe: Güncel kapsam current-release.json ile tanımlanır. Eski katalog ve kaynaklar izlenebilirlik için korunur; eski sayı ve test iddiaları güncel kapsam değildir. Güncel README/indirmeleri kullan. Eski sürümler farklı sağlayıcı/host varsayımları içerebilir. Gemini Deep Research güncel sürümde yoktur.
 
-[Previous README at the preserved base commit](https://github.com/yigityildiz0/yigit-investment-copilot/blob/4eaffe81a866a2058c3d2f297f4896fa50f70df6/README.md).
+[Previous README at the preserved base commit](https://github.com/yigityildiz0/yigit-investment-copilot/blob/79eb014b1cb11a17ebb5c78447c1e2259a9e0c43/README.md).

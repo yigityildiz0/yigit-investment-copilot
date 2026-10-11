@@ -45,10 +45,12 @@ def build(root):
         for s in selected:put(root,f'docs/skills/{s["id"]}.{lang}.md',views.skill_page(s,common,lang))
     for theme in ('dark','light'):
         put(root,f'assets/hero-{theme}.svg',views.hero(title,'Clear questions. Repeatable workflows. Reviewable results.',str(len(selected))+' MAINTAINED WORKFLOWS',theme))
-    if meta['repository']==reg['canonical_repository']:
-        old=root/'docs/index.html';history=root/'docs/legacy-index.html'
-        if old.exists() and not history.exists():history.write_bytes(old.read_bytes())
-        put(root,'docs/index.html',site(reg,selected))
+    old=root/'docs/index.html';history=root/'docs/legacy-index.html'
+    if old.exists() and not history.exists():history.write_bytes(old.read_bytes())
+    html=site(reg,selected).replace('<title>Universal AI Skill Library', '<title>'+meta['title'])
+    if not history.exists():html=html.replace('legacy-index.html','https://github.com/yigityildiz0/universal-ai-skill-library/blob/main/LEGACY.md')
+    put(root,'docs/index.html',html)
+    put(root,'docs/favicon.svg','<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#101c29"/><path d="M17 17L32 34L47 17M32 34V49" fill="none" stroke="#8fe0cd" stroke-width="5" stroke-linecap="round"/></svg>')
     portable={};codex={};gpt_skills={};claude_files={};download_rows=[];claude_counts={};coverage={}
     for name in chosen:
         mapping=source_map(common/name)

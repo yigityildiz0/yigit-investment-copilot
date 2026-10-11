@@ -15,6 +15,6 @@
   "note": "Research only. Prices and availability depend on connected data sources; this skill does not place orders.",
   "note_tr": "Yalnız araştırma içindir. Fiyatlar ve erişim bağlı veri kaynaklarına bağlıdır; bu skill emir göndermez.",
   "repository": "yigit-investment-copilot",
-  "base_commit": "4eaffe81a866a2058c3d2f297f4896fa50f70df6",
+  "base_commit": "79eb014b1cb11a17ebb5c78447c1e2259a9e0c43",
   "canonical_repository": "universal-ai-skill-library"
 }

@@ -39,7 +39,7 @@ Paket model ağırlığı, izin, hesap veya API kredisi sağlamaz. Bu sürüm me
 
 [SKILL.md](../../skills/common/yigit-investment-copilot/SKILL.md) · [Installation](../INSTALL.md) · [License scope](../LICENSE-SCOPE.md)
 
-| Module | Source scope |
+| Modül | Kaynak kapsamı |
 |---|---|
 | [bist-microstructure-flow](../../skills/common/yigit-investment-copilot/modules/bist-microstructure-flow/MODULE.md) | Read short-horizon liquidity and flow evidence on Borsa İstanbul — order book depth (derinlik), broker distribution (AKD), custody/settlement distribution (takas), VWAP, volume ano |
 | [crypto-research-readonly](../../skills/common/yigit-investment-copilot/modules/crypto-research-readonly/MODULE.md) | Research crypto assets in a strictly read-only mode using verified network and contract identity, multi-venue price checks, liquidity and derivatives structure, tokenomics and unlo |

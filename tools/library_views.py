@@ -56,7 +56,7 @@ def skill_page(s, source, lang):
     if n=='research-analyst': out+=('Video: yerel FFmpeg/ffprobe yardımcısı örnek kare ve zaman damgası üretir. Görsel yorum mevcut modele, transkripsiyon ayrı tanıma aracına bağlıdır. Örnekleme bütün videonun izlendiği anlamına gelmez.\n\n' if tr else 'Video: the local FFmpeg/ffprobe helper produces sampled frames and timestamps. Visual interpretation needs host image capability; transcription needs a recognizer. Sampling is not complete coverage.\n\n')
     out+=f'## {"Modüller ve kaynak" if tr else "Modules and source"}\n\n[SKILL.md](../../skills/common/{n}/SKILL.md) · [Installation](../INSTALL.md) · [License scope](../LICENSE-SCOPE.md)\n\n'
     if mods:
-        out+='| Module | Source scope |\n|---|---|\n'
+        out+=('| Modül | Kaynak kapsamı |\n|---|---|\n' if tr else '| Module | Source scope |\n|---|---|\n')
         for name,desc,path in mods: out+=f'| [{name}](../../skills/common/{n}/{path}) | {desc.replace("|","/")} |\n'
     else: out+=('Bağımsız kök akışı; referanslar giriş dosyasında listelenir.\n' if tr else 'Standalone root workflow; references are linked by the entry point.\n')
     return out
