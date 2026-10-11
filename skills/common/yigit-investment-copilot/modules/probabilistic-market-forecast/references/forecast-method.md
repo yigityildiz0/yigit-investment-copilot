@@ -28,3 +28,15 @@ Add separate event branches when a binary or discontinuous catalyst exists. Do n
 ## Candidate ranking
 
 Use a transparent table containing median return, probability of profit, probability of exceeding the target, expected downside, severe-loss probability, liquidity/spread, catalyst quality, invalidation and confidence. Avoid composite scores unless weights are visible.
+
+## Probability meaning and abstention
+
+`forecast_ranges.py` outputs `probability_terminal_at_or_above_target`: the
+probability of ending the horizon above the target under the stated model. It
+does not estimate touching the target at any time. Historical frequencies use a
+single consistent adjusted price basis and completed bars; overlapping windows
+are not independent samples. Both outputs are explicitly uncalibrated. Never
+translate a lane/composite score into a success probability or invent confidence
+percentages. If the event, price basis, measured volatility, sample provenance or
+calibration is unavailable, mark it unavailable or present a clearly conditional
+scenario; do not supply a default 40% volatility or +10% target as observed data.

@@ -1,7 +1,9 @@
-# Third-party notices
+# Current source notices / Güncel kaynak bildirimleri
 
-## Current collection: provenance and license scope
+Original license files stay with source; missing evidence is not an MIT grant. Historical records remain in Git history.
 
-The source tree and per-module LICENSE/NOTICE files are included. Existing license grants govern their own files; this collection does not relicense copied material. Missing explicit grants are marked as not specified, not assumed to be MIT.
+| Skill | Root notices | Evidence status |
+|---|---|---|
+| yigit-investment-copilot | not supplied / sağlanmamış | root-license-not-specified |
 
-- `yigit-investment-copilot`: no explicit license file supplied by the canonical source; consult module provenance
+See provenance-current.json for file hashes, module notices and portability adaptations. Root evidence is not blanket rights clearance.

@@ -3,9 +3,21 @@ name: yigit-investment-copilot
 description: "Investment research and decision copilot for BIST stocks, TEFAS funds, US stocks, ETFs, crypto, VİOP, warrants and gold. Scans all of Borsa İstanbul (and S&P 500) with live data scripts, ranks candidates for a stated horizon, combines fundamental, valuation, analyst-expectation, technical, KAP/news, macro-regime and flow evidence, runs an investment committee and red-team review, then gives probability ranges, buy/hold/sell/trim decisions, entry-stop-target plans, position size, portfolio risk and exit rules; screens TEFAS funds, writes morning notes, backtests strategies and tracks forecast calibration with lessons. Turkish triggers: ne alayım, hangi hisse, BIST'i tara, X ayda en çok ne artar, alınır mı, satayım mı, ne zaman satmalıyım, stop nereye, kaç lot, KAP haberi, bilanço, değerleme, teknik analiz, piyasa ne durumda, sabah bülteni, sektör, portföy, hangi fon, varant, kripto, emin misin. Research only; never places orders."
 ---
 
+
+## Portable execution
+
+Read [the portable execution adapter](PORTABLE.md) before using host-specific tool examples.
+
+## No-extra-cost execution profile
+
+Use the existing host session and tools, public/open-access sources and local computation. Do not route to separately billed APIs, cloud jobs, credits, subscriptions or paid-trial fallbacks, even if a key or connector exists. Provider examples remain reference material; choose an available no-extra-cost equivalent or name the missing capability. This changes cost routing, not skill features or host permissions.
+
+
 # Yiğit Investment Copilot
 
 Act as the decision orchestrator: an independent, broker-agnostic research desk. The user's bank or broker is only where they place orders. Keep answers short and practical unless depth is requested; explain specialist terms in plain Turkish on first use.
+
+Read [research comparability](references/research-comparability.md) when comparing financial statements, estimating portfolio returns/costs or interpreting a backtest. It covers TMS 29/nominal comparability, point-in-time data, adjusted prices, sponsorship and missing liquidity.
 
 ## Operating principles
 
@@ -127,7 +139,7 @@ Open only the module(s) the request needs and read the module file completely be
 
 | Module | Use when | File |
 |---|---|---|
-| `market-data-engine` | Fetch/scan BIST, US and macro data: snapshot of all stocks, histories with corporate-action repair, KAP feed, statements, TCMB rates/CPI, TEFAS funds, horizon-aware multi-lane scan. | [MODULE.md](modules/market-data-engine/MODULE.md) |
+| `market-data-engine` | Fetch/scan BIST, US and macro data: snapshot of all stocks, histories with corporate-action provenance checks, KAP feed, statements, TCMB rates/CPI, TEFAS funds, horizon-aware multi-lane scan. | [MODULE.md](modules/market-data-engine/MODULE.md) |
 | `equity-opportunity-funnel` | Search a broad stock universe and narrow it into recommendation-grade ideas. | [MODULE.md](modules/equity-opportunity-funnel/MODULE.md) |
 | `public-equity-research` | Recommendation-grade research on a named company: filings, earnings quality, valuation, what is priced in. | [MODULE.md](modules/public-equity-research/MODULE.md) |
 | `news-catalyst-intelligence` | KAP/news events, materiality, expectation gap, impact chain, catalyst calendar. | [MODULE.md](modules/news-catalyst-intelligence/MODULE.md) |

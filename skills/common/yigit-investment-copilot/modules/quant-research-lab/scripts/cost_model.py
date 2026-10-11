@@ -30,19 +30,32 @@ except Exception:  # standalone copy without the engine
 
 
 def side_cost(order, price, adv, sigma, a):
+    if any(not math.isfinite(v) or v <= 0 for v in (order, price)):
+        raise ValueError("price and order must be finite and positive")
+    if adv is not None and (not math.isfinite(adv) or adv <= 0):
+        raise ValueError("ADV must be finite and positive when supplied")
+    if any(not math.isfinite(v) or v < 0 for v in (sigma, a.commission_rate, a.bsmv_rate, a.exchange_fee_rate, a.spread_ticks, a.impact_k)):
+        raise ValueError("cost parameters must be finite and nonnegative")
+    if (a.bid is None) != (a.ask is None):
+        raise ValueError("supply both bid and ask, or neither")
+    if a.bid is not None and (not math.isfinite(a.bid) or not math.isfinite(a.ask) or a.bid <= 0 or a.ask < a.bid):
+        raise ValueError("invalid bid/ask quote")
     commission = order * a.commission_rate
     bsmv = commission * a.bsmv_rate
     exchange = order * a.exchange_fee_rate
-    if a.bid and a.ask and a.ask > a.bid:
+    if a.bid is not None:
         spread_pct = (a.ask - a.bid) / ((a.ask + a.bid) / 2)
     else:
         spread_pct = a.spread_ticks * bist_tick(price) / price
     half_spread = order * spread_pct / 2
-    participation = order / adv if adv else None
-    impact = order * a.impact_k * sigma * math.sqrt(participation) if participation else 0.0
-    total = commission + bsmv + exchange + half_spread + impact
+    participation = order / adv if adv is not None else None
+    impact = order * a.impact_k * sigma * math.sqrt(participation) if participation is not None else None
+    known = commission + bsmv + exchange + half_spread
+    total = known + impact if impact is not None else None
     return {"commission": commission, "bsmv": bsmv, "exchange_fee": exchange, "half_spread": half_spread,
-            "impact": impact, "total_try": total, "total_pct": total / order * 100,
+            "impact": impact, "total_try": total, "total_pct": total / order * 100 if total is not None else None,
+            "known_cost_try": known, "known_cost_pct": known / order * 100,
+            "estimate_status": "model_estimate" if impact is not None else "incomplete_missing_adv",
             "participation_of_adv_pct": participation * 100 if participation else None, "spread_pct": spread_pct * 100}
 
 
@@ -78,9 +91,9 @@ def main():
     result = {
         "inputs": {k: v for k, v in vars(a).items() if k != "capacity"},
         "per_side": one,
-        "round_trip_pct": one["total_pct"] * 2,
-        "round_trip_try": one["total_try"] * 2,
-        "break_even_move_pct": one["total_pct"] * 2,
+        "round_trip_pct": one["total_pct"] * 2 if one["total_pct"] is not None else None,
+        "round_trip_try": one["total_try"] * 2 if one["total_try"] is not None else None,
+        "break_even_move_pct": one["total_pct"] * 2 if one["total_pct"] is not None else None,
         "notes": ["BIST hisse alım-satım kazancında yerleşik gerçek kişi için stopaj oranı güncel mevzuattan doğrulanmalı (2026-09 itibarıyla %0).",
                   "Temettü stopajı ayrı konudur (22.12.2024'ten beri %15; doğrula).",
                   "Etki modeli kaba bir tahmindir; ince tahtada gerçek kayma çok daha büyük olabilir."],
@@ -92,7 +105,9 @@ def main():
             c = side_cost(order, a.price, a.adv_try, sigma, a)
             table.append({"order_try": order, "adv_pct": c["participation_of_adv_pct"], "round_trip_pct": c["total_pct"] * 2})
         result["capacity"] = table
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    if one["impact"] is None:
+        result["notes"].append("ADV bilinmiyor: piyasa etkisi ve toplam maliyet hesaplanamadı; known_cost yalnız bilinen bileşenlerdir, all-in değildir.")
+    print(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":

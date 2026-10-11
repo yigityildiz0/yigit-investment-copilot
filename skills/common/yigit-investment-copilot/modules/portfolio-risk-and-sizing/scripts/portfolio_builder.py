@@ -41,6 +41,11 @@ def setup_stdout():
 
 
 def load(path):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "market-data-engine" / "scripts"))
+    from common import history_issues
+    problems = history_issues(path)
+    if problems:
+        raise SystemExit("History unusable: " + "; ".join(problems))
     out = []
     with open(path, encoding="utf-8-sig", newline="") as handle:
         for r in csv.DictReader(handle):
@@ -51,7 +56,7 @@ def load(path):
                 close = float(r.get("close") or adj)
             except (TypeError, ValueError):
                 continue
-            if adj > 0 and close > 0:
+            if math.isfinite(adj) and math.isfinite(close) and adj > 0 and close > 0:
                 out.append((r["date"][:10], adj, close))
     out.sort()
     return out
@@ -63,6 +68,18 @@ def mat_vec(m, v):
 
 def port_var(w, cov):
     return sum(wi * x for wi, x in zip(w, mat_vec(cov, w)))
+
+
+def weighted_simple_returns(weights, log_returns):
+    """Current-weight, daily-rebalanced scenario; not realized historical holdings."""
+    if not weights or len(weights) != len(log_returns):
+        raise ValueError("weights and return series must match")
+    if any(not math.isfinite(w) or w < 0 for w in weights) or not math.isclose(sum(weights), 1.0, abs_tol=1e-9):
+        raise ValueError("long-only weights must be finite and sum to one")
+    size = len(log_returns[0])
+    if any(len(row) != size or any(not math.isfinite(x) for x in row) for row in log_returns):
+        raise ValueError("return series must be finite and aligned")
+    return [sum(w * math.expm1(row[k]) for w, row in zip(weights, log_returns)) for k in range(size)]
 
 
 def covariance(returns, shrink):
@@ -237,8 +254,8 @@ def main():
     mv = mat_vec(cov, w_all)
     rc = [w_all[i] * mv[i] / var if var else 0 for i in range(len(codes))]
     div_ratio = sum(w_all[i] * sd[i] for i in range(len(codes))) / math.sqrt(var) if var else None
-    port_rets = [sum(w_all[i] * rets[i][k] for i in range(len(codes))) for k in range(len(rets[0]))]
-    simple = [math.exp(x) - 1 for x in port_rets]
+    simple = weighted_simple_returns(w_all, rets)
+    port_rets = [math.log1p(x) for x in simple]
     var95 = -quantile(simple, 0.05)
     tail = [x for x in simple if x <= -var95]
     es95 = -sum(tail) / len(tail) if tail else None
@@ -289,7 +306,8 @@ def main():
               "positions": rows, "missing_histories": missing,
               "assumptions": [f"daily log returns over {len(common) - 1} common days; correlations shrunk {a.shrink:.0%} toward their average",
                               "prices are the last delayed close in the history files; re-check before any order",
-                              "VaR/ES and worst-20-day are historical (this window only) and are not loss caps",
+                              "VaR/ES and worst-20-day apply current risky-asset weights to historical returns with daily rebalancing; not realized portfolio performance or loss caps",
+                              "cash is excluded from risk weights; covariance volatility is a log-return approximation; simple returns are weighted before compounding",
                               "BIST lot = 1 share; fees, taxes and slippage not deducted"]}
     a.out.mkdir(parents=True, exist_ok=True)
     (a.out / "portfolio.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

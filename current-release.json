@@ -1,0 +1,21 @@
+{
+  "edition": "2026.10.11",
+  "repository": "yigit-investment-copilot",
+  "canonical": "universal-ai-skill-library",
+  "skills": [
+    "yigit-investment-copilot"
+  ],
+  "claude_parts": {
+    "yigit-investment-copilot": 1
+  },
+  "artifact_sha256": {
+    "downloads/ChatGPT.zip": "8bde235abb1aaf0d4d77775995b46748cc1bbe995a285dea188cfa55618e46bd",
+    "downloads/Claude.zip": "680a5c141989ecf37614c41188a74b0a36550b36df31099c5843333ffed7aee9",
+    "downloads/Codex.zip": "597a09f061fe560b51e4cf5c02b21446c0cbcf45341dafb9571cfacccb12643f",
+    "downloads/portable-skills.zip": "3c90fa0cf936a9eb8d0f10edf3c5a24fffe7858be072865be00a283e02f4150b",
+    "packages/portable/yigit-investment-copilot.zip": "3c90fa0cf936a9eb8d0f10edf3c5a24fffe7858be072865be00a283e02f4150b",
+    "packages/chatgpt/yigit-investment-copilot.zip": "8bde235abb1aaf0d4d77775995b46748cc1bbe995a285dea188cfa55618e46bd",
+    "packages/claude/yigit-investment-copilot.zip": "d6a2bc6c0bd24075bfec6286a0a59a6064150c39c48ab816d3a7dfa5997e90f2"
+  },
+  "validation_scope": "structure, hashes and archives; not live account activation or clinical/financial efficacy"
+}

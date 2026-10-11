@@ -1,11 +1,11 @@
 # Module: market-data-engine
 
 > Part of the `yigit-investment-copilot` skill. Paths below are relative to this module folder (`modules/market-data-engine/`).
-> Original trigger scope: Acquire and screen market data for Borsa İstanbul and cross-asset context: a one-shot snapshot of every listed BIST stock, bulk and full OHLCV price histories with corporate-action repair, KAP disclosures, İş Yatırım statements, TCMB and global macro series, and a multi-lane horizon-aware scan that produces the funnel's universe ledger. Use whenever a request needs live or recent numbers, "BIST'i tara", "tüm hisselere bak", "X ayda en çok artacak", "veri çek", "KAP'ta ne var", "bilançosu nasıl", or when another module needs current evidence. Research data only; never trades.
+> Original trigger scope: Acquire and screen market data for Borsa İstanbul and cross-asset context: a one-shot snapshot of every listed BIST stock, bulk and full OHLCV price histories with corporate-action provenance and discontinuity checks, KAP disclosures, İş Yatırım statements, TCMB and global macro series, and a multi-lane horizon-aware scan that produces the funnel's universe ledger. Use whenever a request needs live or recent numbers, "BIST'i tara", "tüm hisselere bak", "X ayda en çok artacak", "veri çek", "KAP'ta ne var", "bilançosu nasıl", or when another module needs current evidence. Research data only; never trades.
 
 # Market Data Engine
 
-Own data acquisition and the broad screen. Other modules interpret; this one fetches, repairs, timestamps and ranks. Read [references/data-sources.md](references/data-sources.md) for the source catalogue and [references/scan-profiles.md](references/scan-profiles.md) before trusting or explaining scan output. On hosts without internet read [references/offline-and-chatgpt-mode.md](references/offline-and-chatgpt-mode.md).
+Own data acquisition and the broad screen. Other modules interpret; this one fetches, validates, timestamps and ranks. Read [references/data-sources.md](references/data-sources.md) for the source catalogue and [references/scan-profiles.md](references/scan-profiles.md) before trusting or explaining scan output. On hosts without internet read [references/offline-and-chatgpt-mode.md](references/offline-and-chatgpt-mode.md).
 
 ## Pick the host mode first
 
@@ -39,7 +39,7 @@ python scripts/report_html.py --run-dir borsa-out/<klasör>          # self-cont
 Module scripts (all standard-library Python 3.9+):
 
 - `scripts/bist_snapshot.py` — every BIST stock in one call (~626 rows, ~115 fields incl. analyst consensus, targets, surprises, ex-dividend dates; XU030/XU050/XU100/XUTUM tags); `--market america --universe SPX|NDX|DJI` for US members.
-- `scripts/price_history.py` — `--mode chart` full OHLCV + dividends/splits; `--mode spark` bulk close-only (20 symbols per call). Both repair unadjusted corporate actions using the BIST ±10% daily-limit rule and log every repair.
+- `scripts/price_history.py` — `--mode chart` full OHLCV + dividends/splits; `--mode spark` bulk close-only (20 symbols per call). Preserve vendor data and flag suspicious jumps without estimating or applying adjustment factors. Missing adjusted prices remain missing.
 - `scripts/bist_scan.py` — multi-lane percentile screen by horizon profile (12 lanes incl. `expectations`); writes `scan_ranked.csv`, `scan_summary.md`, `scan_excluded.csv` and `funnel_seed.json` (universe ledger + hashes for `equity-opportunity-funnel/scripts/validate_funnel.py`). Market-aware (reads `snapshot.meta.json`).
 - `scripts/kap_feed.py` — KAP disclosures by ticker or market-wide, classified into event classes with importance and caveats; `--details N` pulls cleaned full text.
 - `scripts/financials_isy.py` — quarterly statements (industrial XI_29 or bank UFRS_K), discrete quarters, TTM, margins, ROE, net debt/EBITDA, anomaly checks.
@@ -58,8 +58,9 @@ Module scripts (all standard-library Python 3.9+):
 
 ## Data-quality rules (BIST specific)
 
-- A close-to-close jump beyond −20%/+25% is impossible under the ±10% daily limit; treat it as an unadjusted corporate action (bedelsiz/bedelli/birleşme). Scripts repair and log it; confirm the date in KAP.
-- Vendor 52-week high/low fields can miss bonus-issue adjustments. Prefer repaired history for 52-week metrics.
+- A close-to-close jump beyond −20%/+25% is a discontinuity flag, not proof of a corporate action: trading limits have exceptions, suspensions and data errors exist. Preserve prices and confirm adjustment factors and effective dates against KAP/exchange evidence before analysis.
+- Vendor 52-week high/low fields can miss bonus-issue adjustments. Prefer independently verified adjusted history for 52-week metrics; never manufacture it from the jump or ex-date open.
+- Cache reuse requires matching schema, symbol, range, interval, mode, metadata timestamp, last-bar recency and CSV hash. Fresh filesystem mtime is insufficient. Legacy repaired caches must be re-fetched, not silently reused. Downstream managed-history readers exclude stale, corrupted or unresolved-action series. Standalone CSVs without sidecars have unverified freshness; label them and independently verify before live claims.
 - İş Yatırım columns can contain unit errors (e.g. one period ×1000 smaller). `financials_isy.py` withholds a metric when a cumulative line produces a negative discrete quarter; read the filing instead.
 - TMS 29 (inflation accounting) restates prior periods in each report; nominal YoY growth across reports is approximate. Banks do not apply TMS 29.
 

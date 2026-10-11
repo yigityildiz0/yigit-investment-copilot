@@ -61,7 +61,7 @@ def run(script, *args, timeout=900, capture=False):
     except subprocess.TimeoutExpired:
         say(f"  zaman aşımı: {Path(script).name}")
         return None
-    if res.returncode not in (0, 2):
+    if res.returncode != 0:
         tail = (res.stderr or res.stdout or "").strip().splitlines()[-3:]
         say(f"  HATA {Path(script).name}: {' | '.join(tail)}")
         return None
@@ -106,14 +106,23 @@ def hist_file(folder, code, market="turkey"):
 
 def ta_and_forecast(code, hist, bench, horizon_days, out):
     out.mkdir(parents=True, exist_ok=True)
-    raw = run(TA, hist, "--benchmark", bench, "--horizon-days", horizon_days, "--repair", "--md", out / "teknik.md", capture=True, timeout=120)
+    raw = run(TA, hist, "--benchmark", bench, "--horizon-days", horizon_days, "--md", out / "teknik.md", capture=True, timeout=120)
     if not raw:
         return None
     ta = json.loads(raw)
     (out / "teknik.json").write_text(raw, encoding="utf-8")
     p = ta["indicators"]
-    vol = (p.get("realized_vol_60d_ann_pct") or p.get("realized_vol_20d_ann_pct") or 40) / 100
-    target = (ta["levels"].get("bull_trigger") or p["close"] * 1.1)
+    measured_vol = p.get("realized_vol_60d_ann_pct")
+    if measured_vol is None:
+        measured_vol = p.get("realized_vol_20d_ann_pct")
+    if measured_vol is None:
+        ta["forecast_unavailable"] = "Insufficient measured volatility; no invented 40% fallback."
+        return ta
+    vol = measured_vol / 100
+    target = ta["levels"].get("bull_trigger")
+    if target is None:
+        ta["forecast_unavailable"] = "No measured target level; no invented +10% target."
+        return ta
     bars = max(1, round(horizon_days * 252 / 365))
     fc = run(FC, "--current-price", p["close"], "--annualized-vol", round(vol, 4), "--horizon-days", horizon_days,
              "--target-price", round(target, 4), "--loss-threshold", 0.10, "--history-csv", hist, "--horizon-bars", bars,
@@ -159,8 +168,10 @@ def finalist_block(code, row, ta, kap, fin):
         if f:
             q = f.get("price_quantiles", {})
             emp = (f.get("empirical") or {}).get("price_quantiles", {})
-            lines.append(f"- Olasılık aralığı (log-normal, sıfır sürüklenme): P10 {fmt(q.get('p10'))} · P50 {fmt(q.get('p50'))} · P90 {fmt(q.get('p90'))} · "
-                         f"dirence ulaşma {fmt((f.get('probability_reach_target') or 0) * 100, 0)}% · -%10 kayıp {fmt((f.get('probability_loss_beyond_threshold') or 0) * 100, 0)}%")
+            pt = f.get("probability_terminal_at_or_above_target")
+            pl = f.get("probability_loss_beyond_threshold")
+            lines.append(f"- Koşullu model aralığı (log-normal, sıfır sürüklenme; kalibre edilmemiş): P10 {fmt(q.get('p10'))} · P50 {fmt(q.get('p50'))} · P90 {fmt(q.get('p90'))} · "
+                         f"vade sonunda direnç üstü {fmt(pt * 100 if pt is not None else None, 0)}% · vade sonu -%10 kayıp {fmt(pl * 100 if pl is not None else None, 0)}%")
             if emp:
                 lines.append(f"- Geçmiş taban oranı (aynı vade): P10 {fmt(emp.get('p10'))} · P50 {fmt(emp.get('p50'))} · P90 {fmt(emp.get('p90'))}")
     if fin:
@@ -198,7 +209,9 @@ def cmd_pipeline(a):
         say(f"3/7 {len(codes)} hisse için 2 yıllık kapanış geçmişi (toplu mod, önbellek 20 saat, süre bütçesi {a.history_budget} sn)")
         t0 = time.time()
         fetch_history(codes, cache / "spark2y", "2y", "spark", 20, a.history_budget, a.market)
-        have = sum(1 for t in codes if hist_file(cache / "spark2y", t, a.market).exists())
+        from price_history import cache_valid
+        have = sum(1 for t in codes if cache_valid(hist_file(cache / "spark2y", t, a.market),
+                   yahoo_symbol(t, a.market), "2y", "1d", "spark", 20))
         say(f"   {have}/{len(codes)} hisse geçmişi hazır ({time.time() - t0:.0f} sn)")
         hist_dir = cache / "spark2y"
     kap_all = out / "kap" / "kap_all.json"

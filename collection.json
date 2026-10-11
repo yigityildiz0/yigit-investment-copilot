@@ -1,0 +1,20 @@
+{
+  "title": "Investment Research Copilot",
+  "summary": "Investment research workflows for market evidence, scenarios, portfolio risk and decision plans.",
+  "summary_tr": "Piyasa kanıtları, senaryolar, portföy riski ve karar planları için yatırım araştırması iş akışları.",
+  "skills": [
+    "yigit-investment-copilot"
+  ],
+  "topics": [
+    "agent-skills",
+    "investment-research",
+    "bist",
+    "portfolio-risk",
+    "finance"
+  ],
+  "note": "Research only. Prices and availability depend on connected data sources; this skill does not place orders.",
+  "note_tr": "Yalnız araştırma içindir. Fiyatlar ve erişim bağlı veri kaynaklarına bağlıdır; bu skill emir göndermez.",
+  "repository": "yigit-investment-copilot",
+  "base_commit": "4eaffe81a866a2058c3d2f297f4896fa50f70df6",
+  "canonical_repository": "universal-ai-skill-library"
+}

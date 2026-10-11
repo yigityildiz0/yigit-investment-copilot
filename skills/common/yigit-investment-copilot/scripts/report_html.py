@@ -102,6 +102,11 @@ def lane_bars(row):
 
 
 def load_series(path, n=260):
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "modules" / "market-data-engine" / "scripts"))
+    from common import history_issues
+    if history_issues(path):
+        return []
     rows = read_csv(path)
     out = []
     for r in rows:

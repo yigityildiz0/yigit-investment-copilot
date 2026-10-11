@@ -76,6 +76,11 @@ def pct(a, b):
 
 # ------------------------------------------------------------------ loading
 def load(path, complete_column="complete", repair=False):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "market-data-engine" / "scripts"))
+    from common import history_issues
+    problems = history_issues(path)
+    if problems:
+        raise SystemExit("History unusable: " + "; ".join(problems))
     rows, repaired = [], 0
     with Path(path).open(encoding="utf-8-sig", newline="") as handle:
         for row in csv.DictReader(handle):
@@ -87,10 +92,14 @@ def load(path, complete_column="complete", repair=False):
             except (TypeError, ValueError, KeyError):
                 continue
             adj = row.get("adj_close")
-            factor = float(adj) / c if adj not in (None, "") and c else 1.0
+            try:
+                factor = float(adj) / c if adj not in (None, "") and c else 1.0
+            except (ValueError, TypeError):
+                raise SystemExit(f"invalid adjusted price: {row.get('date')}")
             o, h, l, c = o * factor, h * factor, l * factor, c * factor
-            v = v / factor if factor else v
-            if min(o, h, l, c) <= 0 or v < 0:
+            # adj_close includes dividends; it cannot be used as a share-count
+            # factor. Preserve vendor volume instead of dividend-adjusting it.
+            if not all(math.isfinite(x) for x in (o, h, l, c, v)) or min(o, h, l, c) <= 0 or v < 0:
                 if repair:
                     repaired += 1
                     continue

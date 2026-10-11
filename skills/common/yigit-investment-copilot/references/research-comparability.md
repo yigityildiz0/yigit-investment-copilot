@@ -1,0 +1,15 @@
+# Investment evidence and comparability
+
+Use alongside the existing domain modules; this reference adds data interpretation, not a restriction on supported instruments or analysis methods.
+
+- Identify security/ticker/exchange, share class, currency, quote timestamp/timezone and delay. Distinguish adjusted historical close from tradable current quotes. Preserve split/dividend/corporate-action provenance; total-return and price-only series are not interchangeable.
+- For statements, record period end, actual publication/filing date, consolidation scope, currency, unit scaling, audit status and revisions. Compare like reporting bases. In Türkiye, mark TMS 29/inflation-restated versus nominal periods; do not mix unadjusted prior-year sales with restated comparatives or treat accounting monetary gains as operating cash flow.
+- Trace balance-sheet strength through cash conversion, debt maturity/currency, refinancing, related parties and contingent obligations. Reconcile valuation inputs and shares outstanding at the same date; show sensitivity rather than a single certain target.
+- Backtests use information available at the decision date, survivorship-aware universes where possible and realistic fees/spread/slippage/turnover. Split model selection from out-of-sample evaluation; disclose delisted/missing securities and look-ahead/data-snooping limits.
+- Current-weight risk scenarios are not the historical performance of an actual portfolio. Weighted asset log returns cannot be exponentiated as if they were an exact portfolio return. Aggregate simple returns first, then compound; state rebalancing, cash and cost assumptions.
+- Missing ADV/liquidity data means unknown impact, not zero impact. Show known cost components separately from total modelled costs. Default tariff/tax parameters are placeholders until verified for broker, instrument, residency and date.
+- Treat issuer/promoter/influencer/affiliate claims as interested evidence. Use KAP/issuer filings, Borsa İstanbul/TEFAS and SEC records where relevant, then independent corroboration. An official filing proves the disclosure, not the forecast. Do not infer independence from missing conflict disclosures.
+- Use public sources or user-provided local CSVs with coverage/freshness labels. EVDS or other sources may require a key even when free; a key’s existence does not authorize a billed service. No paid market-data/API fallback. A source outage becomes a conditional conclusion, not invented live data.
+- Ask for horizon, capital/risk capacity and constraints only when required for the decision; never assume loss tolerance. Preserve distinctions among analysis, scenarios, a plan and an executed order.
+
+Source starting points: https://www.kap.org.tr/ ; https://www.borsaistanbul.com/ ; https://evds2.tcmb.gov.tr/ ; https://www.sec.gov/search-filings/edgar-application-programming-interfaces . Access and current records must be verified for the actual task; these links are not evidence for a specific quote or trade.

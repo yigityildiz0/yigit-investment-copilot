@@ -14,6 +14,9 @@ Usage:
 """
 
 import argparse
+import hashlib
+import json
+import math
 import sys
 
 sys.dont_write_bytecode = True  # keep installed skill folders clean
@@ -28,6 +31,30 @@ from common import (NetworkError, TRT, default_out, get_json, iso, market_status
 
 HOSTS = ("https://query1.finance.yahoo.com", "https://query2.finance.yahoo.com")
 VALID_RANGES = {"1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"}
+CACHE_SCHEMA = 2
+
+
+def cache_valid(path, symbol, rng, interval, mode, max_age_hours):
+    """Trust request-matched metadata/content, not a copied file's fresh mtime."""
+    if max_age_hours <= 0 or not path.is_file():
+        return False
+    try:
+        meta = json.loads(path.with_suffix(".meta.json").read_text(encoding="utf-8"))
+        expected = {"cache_schema": CACHE_SCHEMA, "yahoo_symbol": symbol,
+                    "range": rng, "interval": interval, "mode": mode}
+        if any(meta.get(k) != v for k, v in expected.items()):
+            return False
+        fetched = datetime.fromisoformat(meta["fetched_at"])
+        if fetched.tzinfo is None:
+            return False
+        age = (now_trt() - fetched).total_seconds() / 3600
+        bar_age = (now_trt().date() - datetime.fromisoformat(meta["last_date"]).date()).days
+        max_bar_age = {"1d": 7, "1wk": 10, "1mo": 40}.get(interval, 7)
+        if not 0 <= age <= max_age_hours or not 0 <= bar_age <= max_bar_age:
+            return False
+        return meta.get("csv_sha256") == hashlib.sha256(path.read_bytes()).hexdigest()
+    except (OSError, ValueError, KeyError, TypeError, OverflowError):
+        return False
 
 
 def fetch_chart(symbol, rng="2y", interval="1d"):
@@ -53,15 +80,16 @@ def fetch_chart(symbol, rng="2y", interval="1d"):
 
 def parse(result, interval):
     meta = result.get("meta", {})
-    offset = timedelta(seconds=int(meta.get("gmtoffset") or 10800))
+    offset = timedelta(seconds=int(meta.get("gmtoffset") if meta.get("gmtoffset") is not None else 10800))
     zone = timezone(offset)
     stamps = result.get("timestamp") or []
     quote = (result.get("indicators", {}).get("quote") or [{}])[0]
     adj = (result.get("indicators", {}).get("adjclose") or [{}])[0].get("adjclose")
     rows, seen = [], set()
     for i, ts in enumerate(stamps):
-        values = [quote.get(key, [None] * len(stamps))[i] for key in ("open", "high", "low", "close", "volume")]
-        if values[3] is None:
+        values = [(quote.get(key) or [])[i] if i < len(quote.get(key) or []) else None
+                  for key in ("open", "high", "low", "close", "volume")]
+        if values[3] is None or not math.isfinite(float(values[3])) or values[3] <= 0:
             continue
         day = datetime.fromtimestamp(ts, zone).date().isoformat()
         if day in seen:  # Yahoo occasionally repeats the live bar
@@ -72,7 +100,7 @@ def parse(result, interval):
         h = h if h is not None else max(o, c)
         l = l if l is not None else min(o, c)
         rows.append({"date": day, "open": o, "high": h, "low": l, "close": c,
-                     "adj_close": adj[i] if adj and i < len(adj) and adj[i] is not None else c,
+                     "adj_close": adj[i] if adj and i < len(adj) and adj[i] is not None else "",
                      "volume": v if v is not None else 0, "complete": 1})
     now = now_trt()
     if rows and interval == "1d":
@@ -102,37 +130,25 @@ def parse(result, interval):
 
 
 def repair_corporate_actions(rows, events, is_bist):
-    """BIST caps daily moves at ±10%, so a close-to-close jump beyond -20%/+25% in the adjusted
-    series means a corporate action (bonus/rights issue, reverse split) that the vendor did not
-    adjust. Apply the vendor split ratio when one exists on that date, otherwise estimate the
-    factor from the ex-date open (open ≈ exchange-adjusted base price). Returns the repair log."""
+    """Legacy name: flag discontinuities only; never infer or apply an adjustment.
+
+    Price limits have exceptions. A jump is not proof of a corporate action, and
+    vendor closes may already be split-adjusted. Preserve OHLCV and vendor values.
+    """
     if not is_bist or len(rows) < 2:
         return []
-    splits = {}
-    for e in events:
-        if e.get("type") == "splits" and e.get("ratio"):
-            try:
-                num, den = (float(x) for x in str(e["ratio"]).split(":"))
-                splits[e["date"]] = den / num  # post/pre price factor
-            except ValueError:
-                pass
+    splits = {e.get("date"): e.get("ratio") for e in events if e.get("type") == "splits"}
     log = []
     for i in range(len(rows) - 1, 0, -1):
         prev, cur = rows[i - 1], rows[i]
-        ratio = cur["adj_close"] / prev["adj_close"] if prev["adj_close"] else 1.0
+        previous = prev.get("adj_close") or prev["close"]
+        current = cur.get("adj_close") or cur["close"]
+        ratio = current / previous if previous else 1.0
         if 0.80 <= ratio <= 1.25:
             continue
-        if cur["date"] in splits:
-            factor, method = splits[cur["date"]], "vendor split ratio"
-        else:
-            factor, method = (cur["open"] / prev["close"] if prev["close"] else ratio), "estimated from ex-date open"
-        if not factor or factor <= 0:
-            continue
-        for j in range(i):
-            for key in ("open", "high", "low", "close", "adj_close"):
-                rows[j][key] *= factor
-            rows[j]["volume"] = rows[j]["volume"] / factor if factor else rows[j]["volume"]
-        log.append({"date": cur["date"], "raw_ratio": round(ratio, 4), "factor": round(factor, 6), "method": method})
+        log.append({"date": cur["date"], "observed_ratio": round(ratio, 4),
+                    "vendor_split_ratio": splits.get(cur["date"]), "applied": False,
+                    "status": "unresolved_discontinuity", "action": "Verify source and corporate-action basis before return analysis"})
     return list(reversed(log))
 
 
@@ -143,10 +159,8 @@ def fetch_one(code, out_dir, rng, interval, max_age_hours):
     symbol = yahoo_symbol(code, MARKET["name"])
     name = safe_name(code.upper() if "." not in code else symbol)
     csv_path = out_dir / f"{name}.csv"
-    if max_age_hours and csv_path.exists():
-        age = (time.time() - csv_path.stat().st_mtime) / 3600
-        if age <= max_age_hours:
-            return code, csv_path, "cached"
+    if cache_valid(csv_path, symbol, rng, interval, "chart", max_age_hours):
+        return code, csv_path, "cached"
     result = fetch_chart(symbol, rng, interval)
     rows, info = parse(result, interval)
     if len(rows) < 2:
@@ -155,7 +169,8 @@ def fetch_one(code, out_dir, rng, interval, max_age_hours):
         row["vendor_adj_close"] = row["adj_close"]
     repairs = repair_corporate_actions(rows, info["events"], symbol.endswith(".IS") and info.get("instrument_type") == "EQUITY"
                                        and interval == "1d")
-    info["ca_repairs"] = repairs
+    info["ca_repairs"] = []
+    info["corporate_action_flags"] = repairs
     write_csv(csv_path, rows, ["date", "open", "high", "low", "close", "adj_close", "volume", "complete", "vendor_adj_close"])
     fetched = now_trt()
     write_json(out_dir / f"{name}.meta.json", {
@@ -163,9 +178,9 @@ def fetch_one(code, out_dir, rng, interval, max_age_hours):
         "fetched_at": iso(fetched), "range": rng, "interval": interval, "bars": len(rows),
         "first_date": rows[0]["date"], "last_date": rows[-1]["date"],
         "last_bar_complete": bool(rows[-1]["complete"]),
-        "adjustment": "adj_close = Yahoo dividend/split adjustment plus ca_repairs (BIST ±10% limit rule: jumps beyond "
-                      "-20%/+25% are treated as unadjusted corporate actions). vendor_adj_close keeps Yahoo's value. "
-                      "Confirm repaired dates against KAP (bedelsiz/bedelli/birleşme).",
+        "cache_schema": CACHE_SCHEMA, "mode": "chart", "csv_sha256": hashlib.sha256(csv_path.read_bytes()).hexdigest(),
+        "adjustment": "Vendor OHLCV preserved; adj_close is vendor-provided or blank when unavailable. No inferred corporate-action repairs.",
+        "adjustment_verified": False,
         **info,
     })
     return code, csv_path, "downloaded"
@@ -193,8 +208,8 @@ def fetch_spark_batch(symbols, rng, interval, first_host=0):
 
 
 def run_spark(codes, out_dir, rng="2y", interval="1d", max_age_hours=0, workers=4):
-    """Fast mode: close-only series (open/high/low set to close, volume 0) with the same
-    corporate-action repair. Enough for momentum, 52-week, trend and volatility features.
+    """Fast mode: close-only series (open/high/low set to close, volume 0).
+    Adjustment basis is unverified; not suitable for validated total-return estimates.
     Batches of 20 symbols run `workers` at a time (default 4; polite to the endpoint)."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -202,7 +217,7 @@ def run_spark(codes, out_dir, rng="2y", interval="1d", max_age_hours=0, workers=
     for code in codes:
         name = safe_name(code.upper() if "." not in code else yahoo_symbol(code, MARKET["name"]))
         path = out_dir / f"{name}.csv"
-        if max_age_hours and path.exists() and (time.time() - path.stat().st_mtime) / 3600 <= max_age_hours:
+        if cache_valid(path, yahoo_symbol(code, MARKET["name"]), rng, interval, "spark", max_age_hours):
             ok[code] = {"path": str(path), "status": "cached"}
         else:
             todo.append((code, yahoo_symbol(code, MARKET["name"]), name))
@@ -235,14 +250,17 @@ def run_spark(codes, out_dir, rng="2y", interval="1d", max_age_hours=0, workers=
             for row in rows:
                 row["vendor_adj_close"] = row["adj_close"]
             is_equity = sym.endswith(".IS") and (info.get("instrument_type") in (None, "EQUITY"))
-            info["ca_repairs"] = repair_corporate_actions(rows, [], is_equity and interval == "1d")
+            info["ca_repairs"] = []
+            info["corporate_action_flags"] = repair_corporate_actions(rows, [], is_equity and interval == "1d")
             path = write_csv(out_dir / f"{name}.csv", rows,
                              ["date", "open", "high", "low", "close", "adj_close", "volume", "complete", "vendor_adj_close"])
             write_json(out_dir / f"{name}.meta.json", {
                 "code": code, "yahoo_symbol": sym, "source": "Yahoo Finance spark API (unofficial, delayed; close only)",
                 "fetched_at": iso(now_trt()), "range": rng, "interval": interval, "bars": len(rows), "ohlc": False,
                 "first_date": rows[0]["date"], "last_date": rows[-1]["date"],
-                "adjustment": "Yahoo split-adjusted close (no dividend adjustment) plus ca_repairs (ex-date move assumed 0).",
+                "cache_schema": CACHE_SCHEMA, "mode": "spark", "csv_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                "adjustment": "Close-only vendor data; adjustment basis unverified, adj_close unavailable. No inferred repairs. Re-fetch chart and verify corporate actions before precise levels or returns.",
+                "adjustment_verified": False,
                 **info})
             ok[code] = {"path": str(path), "status": "downloaded"}
     return ok, failed

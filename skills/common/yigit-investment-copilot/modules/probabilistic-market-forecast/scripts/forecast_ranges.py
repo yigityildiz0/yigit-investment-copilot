@@ -5,6 +5,7 @@ import argparse
 import csv
 import json
 import math
+import sys
 from pathlib import Path
 from statistics import NormalDist
 
@@ -25,19 +26,40 @@ def percentile(values, probability):
 
 
 def empirical(csv_path, horizon_bars, current_price, target_price, loss_threshold):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "market-data-engine" / "scripts"))
+    from common import history_issues
+    problems = history_issues(csv_path)
+    if problems:
+        raise SystemExit("History unusable: " + "; ".join(problems))
+    if horizon_bars <= 0:
+        raise SystemExit("horizon-bars must be positive")
     closes = []
+    dates = []
     with csv_path.open(encoding="utf-8-sig", newline="") as handle:
-        for row in csv.DictReader(handle):
-            closes.append(float(row["close"]))
-    if len(closes) <= horizon_bars or any(value <= 0 for value in closes):
+        reader = csv.DictReader(handle)
+        price_column = "adj_close" if "adj_close" in (reader.fieldnames or []) else "close"
+        for row in reader:
+            if str(row.get("complete", "1")).strip().lower() in {"0", "false", "no"}:
+                continue
+            try:
+                closes.append(float(row[price_column]))
+            except (KeyError, ValueError, TypeError):
+                raise SystemExit(f"History has missing/invalid {price_column}; do not mix price bases")
+            dates.append(row.get("date", ""))
+    if dates != sorted(dates) or len(set(dates)) != len(dates) or not all(dates):
+        raise SystemExit("history dates must be present, unique and ascending")
+    if len(closes) <= horizon_bars or any(not math.isfinite(value) or value <= 0 for value in closes):
         raise SystemExit("history needs more positive closes than horizon-bars")
     returns = [closes[i] / closes[i - horizon_bars] - 1 for i in range(horizon_bars, len(closes))]
     target_return = target_price / current_price - 1 if target_price else None
     return {
         "samples": len(returns),
+        "price_basis": price_column,
+        "calibrated": False,
+        "interpretation": "Overlapping historical terminal returns; descriptive frequency, not independent evidence or calibrated future confidence.",
         "return_quantiles": {f"p{int(q*100)}": percentile(returns, q) for q in QUANTILES},
         "price_quantiles": {f"p{int(q*100)}": current_price * (1 + percentile(returns, q)) for q in QUANTILES},
-        "probability_reach_target": sum(value >= target_return for value in returns) / len(returns) if target_return is not None else None,
+        "probability_terminal_at_or_above_target": sum(value >= target_return for value in returns) / len(returns) if target_return is not None else None,
         "probability_loss_beyond_threshold": sum(value <= -loss_threshold for value in returns) / len(returns),
         "warning": "Rolling samples overlap and may span different regimes; treat this as a base rate, not an independent forecast.",
     }
@@ -54,6 +76,11 @@ def main():
     parser.add_argument("--history-csv", type=Path)
     parser.add_argument("--horizon-bars", type=int)
     args = parser.parse_args()
+    numeric = [args.current_price, args.annualized_vol, args.horizon_days, args.annualized_drift, args.loss_threshold]
+    if args.target_price is not None:
+        numeric.append(args.target_price)
+    if not all(math.isfinite(value) for value in numeric):
+        raise SystemExit("numeric inputs must be finite")
     if args.current_price <= 0 or args.annualized_vol < 0 or args.horizon_days <= 0:
         raise SystemExit("current-price and horizon-days must be positive; volatility non-negative")
     if not 0 < args.loss_threshold < 1:
@@ -69,7 +96,7 @@ def main():
         prices[f"p{int(q*100)}"] = args.current_price * math.exp(log_return)
 
     probability_target = None
-    if args.target_price:
+    if args.target_price is not None:
         if args.target_price <= 0:
             raise SystemExit("target-price must be positive")
         threshold = math.log(args.target_price / args.current_price)
@@ -86,12 +113,14 @@ def main():
             "horizon_days": args.horizon_days,
         },
         "price_quantiles": prices,
-        "probability_reach_target": probability_target,
+        "probability_terminal_at_or_above_target": probability_target,
         "probability_loss_beyond_threshold": probability_loss,
+        "calibrated": False,
+        "probability_basis": "Assumed lognormal terminal-price model, not barrier-touch probability or evidence-calibrated confidence.",
         "warning": "This smooth model can understate jumps, gaps, liquidity, leverage and event tails.",
     }
     if args.history_csv:
-        if not args.horizon_bars:
+        if args.horizon_bars is None or args.horizon_bars <= 0:
             raise SystemExit("--horizon-bars is required with --history-csv")
         result["empirical"] = empirical(args.history_csv, args.horizon_bars, args.current_price, args.target_price, args.loss_threshold)
     print(json.dumps(result, ensure_ascii=False, indent=2))

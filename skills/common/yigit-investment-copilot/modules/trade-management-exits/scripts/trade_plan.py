@@ -31,7 +31,7 @@ except Exception:
 
 def ta_levels(history):
     from technical_indicators import indicator_pack, load, pivots  # noqa: E402
-    rows, _ = load(history, repair=True)
+    rows, _ = load(history, repair=False)
     pack = indicator_pack(rows)
     return pack, pivots(rows, pack.get("atr14"))
 

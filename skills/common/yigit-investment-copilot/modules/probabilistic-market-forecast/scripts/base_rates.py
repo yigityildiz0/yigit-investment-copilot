@@ -47,6 +47,12 @@ def setup_stdout():
 
 
 def load(path):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "market-data-engine" / "scripts"))
+    from common import history_issues
+    problems = history_issues(path, require_current=False)
+    if problems:
+        print(f"History excluded {Path(path).name}: {'; '.join(problems)}", file=sys.stderr)
+        return []
     rows = []
     with open(path, encoding="utf-8-sig", newline="") as handle:
         for r in csv.DictReader(handle):
@@ -56,7 +62,7 @@ def load(path):
                 v = float(r.get("adj_close") or r.get("close"))
             except (TypeError, ValueError):
                 continue
-            if v > 0:
+            if math.isfinite(v) and v > 0:
                 rows.append((r["date"][:10], v))
     rows.sort()
     return rows

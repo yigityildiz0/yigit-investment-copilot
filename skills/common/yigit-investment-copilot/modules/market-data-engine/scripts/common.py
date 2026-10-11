@@ -49,6 +49,37 @@ def iso(dt):
     return dt.isoformat(timespec="seconds")
 
 
+def history_issues(path, max_age_hours=48, require_current=True):
+    """Validate managed history sidecars before downstream use; no network/repair.
+
+    User-supplied CSVs without a sidecar are unmanaged, not freshness-verified.
+    Historical studies may disable recency, but not integrity or legacy repairs.
+    """
+    path = Path(path)
+    sidecar = path.with_suffix(".meta.json")
+    if not sidecar.exists():
+        return []
+    try:
+        meta = json.loads(sidecar.read_text(encoding="utf-8"))
+        issues = []
+        if meta.get("cache_schema") != 2 or meta.get("ca_repairs"):
+            issues.append("legacy/unverified price adjustment cache; re-fetch needed")
+        if meta.get("corporate_action_flags"):
+            issues.append("unresolved corporate-action discontinuity")
+        if meta.get("csv_sha256") != hashlib.sha256(path.read_bytes()).hexdigest():
+            issues.append("history content does not match metadata")
+        if require_current:
+            fetched = datetime.fromisoformat(meta["fetched_at"])
+            age = (now_trt() - fetched).total_seconds() / 3600
+            bar_age = (now_trt().date() - datetime.fromisoformat(meta["last_date"]).date()).days
+            max_bar_age = {"1d": 7, "1wk": 10, "1mo": 40}.get(meta.get("interval"), 7)
+            if not 0 <= age <= max_age_hours or not 0 <= bar_age <= max_bar_age:
+                issues.append("stale/future-dated history; live claims unavailable")
+        return issues
+    except (OSError, ValueError, TypeError, KeyError, OverflowError):
+        return ["invalid or incomplete history metadata"]
+
+
 def http(url, *, data=None, json_body=None, headers=None, timeout=20, retries=2, backoff=1.5, opener=None):
     """GET (or POST when data/json_body is given) with retries. Returns raw bytes."""
     head = {"User-Agent": UA, "Accept": "*/*", "Accept-Encoding": "gzip"}

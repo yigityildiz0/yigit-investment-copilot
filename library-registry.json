@@ -1,0 +1,746 @@
+{
+  "schema_version": 1,
+  "owner": "yigityildiz0",
+  "canonical_repository": "universal-ai-skill-library",
+  "release": "2026.10.11",
+  "skills": [
+    {
+      "id": "academic-study-coach",
+      "category": "Learn & write",
+      "en": {
+        "purpose": "Turn course material into a study plan, active recall and literature-reading practice.",
+        "prompt": "Build a two-week revision plan for rehabilitation research methods.",
+        "flow": "Set the learning goal; identify gaps; give a worked example; test recall and adjust the plan."
+      },
+      "tr": {
+        "purpose": "Ders içeriğini çalışma planına, aktif hatırlamaya ve literatür okuma pratiğine dönüştürür.",
+        "prompt": "Rehabilitasyon araştırma yöntemleri için iki haftalık tekrar planı hazırla.",
+        "flow": "Öğrenme hedefini belirler; eksikleri bulur; örnek çözer; hatırlamayı sınayıp planı günceller."
+      }
+    },
+    {
+      "id": "ai-agent-builder",
+      "category": "Build software",
+      "en": {
+        "purpose": "Build, audit and maintain skills, agent workflows and MCP integrations.",
+        "prompt": "Review this skill package and improve its routing without losing features.",
+        "flow": "Select the writing, update, security or integration module; inspect the host; make a bounded change; validate the result."
+      },
+      "tr": {
+        "purpose": "Skill, ajan iş akışı ve MCP entegrasyonu geliştirir, inceler ve bakımını yapar.",
+        "prompt": "Bu skill paketini incele; özellik kaybetmeden yönlendirmesini iyileştir.",
+        "flow": "Yazım, güncelleme, güvenlik veya entegrasyon modülünü seçer; ortamı inceler; sınırlı değişikliği doğrular."
+      }
+    },
+    {
+      "id": "ai-image-video-studio",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Plan and troubleshoot image/video production, including local ComfyUI workflows.",
+        "prompt": "Diagnose this ComfyUI workflow and propose a reproducible fix.",
+        "flow": "Identify the media task and available runtime; inspect workflow/model compatibility; plan or repair; check the actual output."
+      },
+      "tr": {
+        "purpose": "Yerel ComfyUI dahil görsel/video üretimini planlar ve sorun giderir.",
+        "prompt": "Bu ComfyUI akışındaki hatayı bul ve tekrarlanabilir çözüm öner.",
+        "flow": "Medya hedefi ve ortamı belirler; akış/model uyumunu inceler; planlar veya onarır; gerçek çıktıyı kontrol eder."
+      }
+    },
+    {
+      "id": "ai-research-skills",
+      "category": "Research & analyze",
+      "en": {
+        "purpose": "Navigate a broad ML engineering library for training, RAG, evaluation and experiments.",
+        "prompt": "Design a leakage-aware evaluation for a Turkish RAG system.",
+        "flow": "Choose one relevant technical module; inspect compute/data limits; define baselines and held-out evaluation; report reproducibility and uncertainty."
+      },
+      "tr": {
+        "purpose": "Eğitim, RAG, değerlendirme ve deneyler için geniş ML mühendisliği kütüphanesini yönlendirir.",
+        "prompt": "Türkçe RAG sistemi için veri sızıntısını gözeten değerlendirme tasarla.",
+        "flow": "İlgili teknik modülü seçer; donanım/veri sınırlarını inceler; temel karşılaştırma ve bağımsız değerlendirme kurar; belirsizliği raporlar."
+      }
+    },
+    {
+      "id": "banner-design",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Compose banners around a real platform size, readable message and clear action.",
+        "prompt": "Design a LinkedIn banner for an evidence-based rehabilitation project.",
+        "flow": "Establish size, audience and message; choose composition; build the asset; check safe areas and legibility."
+      },
+      "tr": {
+        "purpose": "Gerçek platform ölçüsü, okunabilir mesaj ve belirgin eylem etrafında banner tasarlar.",
+        "prompt": "Kanıta dayalı rehabilitasyon projesi için LinkedIn bannerı tasarla.",
+        "flow": "Ölçü, kitle ve mesajı belirler; kompozisyon seçer; görseli üretir; güvenli alanı ve okunabilirliği kontrol eder."
+      }
+    },
+    {
+      "id": "brand",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Keep visual identity, voice and messaging consistent across deliverables.",
+        "prompt": "Create a restrained identity and voice guide for this open-source collection.",
+        "flow": "Review existing brand evidence; define audience and positioning; map voice/visual rules; apply them consistently."
+      },
+      "tr": {
+        "purpose": "Görsel kimlik, üslup ve mesajı farklı çıktılarda tutarlı tutar.",
+        "prompt": "Bu açık kaynak koleksiyonu için sade kimlik ve üslup rehberi hazırla.",
+        "flow": "Mevcut marka malzemesini inceler; kitle ve konumlamayı belirler; dil/görsel kurallarını tutarlı uygular."
+      }
+    },
+    {
+      "id": "campaign-plan",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Plan a campaign with audience, channels, content, resources and measurable outcomes.",
+        "prompt": "Plan an organic launch for this skill library with a four-week content calendar.",
+        "flow": "Define the objective and audience; select suitable channels; sequence assets; specify meaningful measures and assumptions."
+      },
+      "tr": {
+        "purpose": "Kitle, kanal, içerik, kaynak ve ölçülebilir sonuçlarla kampanya planlar.",
+        "prompt": "Bu skill kütüphanesi için dört haftalık organik tanıtım takvimi hazırla.",
+        "flow": "Hedefi ve kitleyi belirler; uygun kanalları seçer; içerikleri sıralar; ölçümleri ve varsayımları açıklar."
+      }
+    },
+    {
+      "id": "caveman",
+      "category": "Everyday workflows",
+      "en": {
+        "purpose": "Use official Caveman, Ultracave and Megacave modes for concise communication.",
+        "prompt": "/caveman ultra",
+        "flow": "Require explicit mode activation; load only that upstream mode; preserve facts/code; keep status and deactivation honest."
+      },
+      "tr": {
+        "purpose": "Kısa iletişim için resmî Caveman, Ultracave ve Megacave modlarını kullanır.",
+        "prompt": "/caveman ultra",
+        "flow": "Açık mod isteğiyle etkinleşir; yalnız ilgili modu yükler; bilgi/kodu korur; durum ve kapatma davranışını doğru bildirir."
+      }
+    },
+    {
+      "id": "coding-workflow",
+      "category": "Build software",
+      "en": {
+        "purpose": "Move from a code problem to a scoped implementation and verified result.",
+        "prompt": "Find the cause of this failing test and make the smallest reliable fix.",
+        "flow": "Inspect the existing project; reproduce or localize the issue; implement a focused change; run relevant checks."
+      },
+      "tr": {
+        "purpose": "Kod sorununu kapsamı belli uygulamaya ve doğrulanmış sonuca dönüştürür.",
+        "prompt": "Bu başarısız testin nedenini bul ve en küçük güvenilir düzeltmeyi yap.",
+        "flow": "Mevcut projeyi inceler; sorunu yeniden üretir veya daraltır; odaklı değişiklik yapar; ilgili testleri çalıştırır."
+      }
+    },
+    {
+      "id": "context7-mcp",
+      "category": "Build software",
+      "en": {
+        "purpose": "Retrieve current library documentation through an available Context7 integration.",
+        "prompt": "Check the current documented API before changing this React integration.",
+        "flow": "Resolve the exact library/version; ask a focused documentation question; ground the implementation in retrieved examples."
+      },
+      "tr": {
+        "purpose": "Mevcut Context7 entegrasyonuyla güncel kütüphane dokümanına ulaşır.",
+        "prompt": "Bu React entegrasyonunu değiştirmeden güncel API dokümanını kontrol et.",
+        "flow": "Doğru kütüphane/sürümü bulur; odaklı doküman sorgusu yapar; uygulamayı getirilen örneklerle destekler."
+      }
+    },
+    {
+      "id": "data-analyst",
+      "category": "Research & analyze",
+      "en": {
+        "purpose": "Analyze data with explicit units, missingness, assumptions and uncertainty.",
+        "prompt": "Explore this dataset and explain which conclusions its sample can support.",
+        "flow": "Inspect schema and quality; choose an appropriate method; compute or visualize; distinguish observation from interpretation."
+      },
+      "tr": {
+        "purpose": "Veriyi birim, eksik değer, varsayım ve belirsizlikleri açık tutarak analiz eder.",
+        "prompt": "Bu veri kümesini incele; örneklemin hangi sonuçları desteklediğini açıkla.",
+        "flow": "Şema ve kaliteyi inceler; uygun yöntemi seçer; hesaplar/görselleştirir; gözlem ile yorumu ayırır."
+      }
+    },
+    {
+      "id": "design-system",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Connect design tokens, component specifications and audience-appropriate presentations.",
+        "prompt": "Create semantic chart colors and an accessible academic slide system.",
+        "flow": "Audit existing tokens; define semantic roles; map components; select HTML or editable presentation requirements; check consistency."
+      },
+      "tr": {
+        "purpose": "Tasarım tokenları, bileşen özellikleri ve hedef kitleye uygun sunumları bağlar.",
+        "prompt": "Semantik grafik renkleri ve erişilebilir akademik sunum sistemi oluştur.",
+        "flow": "Mevcut tokenları inceler; semantik rolleri belirler; bileşenleri eşler; çıktı biçimini seçer; tutarlılığı kontrol eder."
+      }
+    },
+    {
+      "id": "design",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Route a design task to the right brand, interface, icon, banner or slide workflow.",
+        "prompt": "Develop a cohesive visual direction for this GitHub portfolio.",
+        "flow": "Clarify the communication goal; choose the narrow design specialty; reuse available assets; verify the artifact."
+      },
+      "tr": {
+        "purpose": "Tasarım işini uygun marka, arayüz, ikon, banner veya sunum akışına yönlendirir.",
+        "prompt": "Bu GitHub portföyü için tutarlı görsel yön geliştir.",
+        "flow": "İletişim hedefini netleştirir; ilgili uzmanlığı seçer; mevcut varlıkları kullanır; çıktıyı kontrol eder."
+      }
+    },
+    {
+      "id": "find-docs",
+      "category": "Build software",
+      "en": {
+        "purpose": "Find authoritative documentation and identify the correct version and source.",
+        "prompt": "Locate the official migration guidance for this dependency.",
+        "flow": "Identify the product and version; discover official references; open the relevant sections; return traceable findings."
+      },
+      "tr": {
+        "purpose": "Yetkili doküman kaynağını ve doğru sürümü bulur.",
+        "prompt": "Bu bağımlılık için resmî sürüm geçiş rehberini bul.",
+        "flow": "Ürün ve sürümü belirler; resmî kaynakları bulur; ilgili bölümleri açar; izlenebilir bulgular sunar."
+      }
+    },
+    {
+      "id": "graphify",
+      "category": "Build software",
+      "en": {
+        "purpose": "Understand relationships across code, documents and research using a knowledge graph.",
+        "prompt": "Explain the impact of changing this module using the existing graph.",
+        "flow": "Inspect available graph/runtime; query scoped relationships; distinguish extracted facts from inferred links; update only within the task."
+      },
+      "tr": {
+        "purpose": "Bilgi grafıyla kod, belge ve araştırma arasındaki ilişkileri anlamaya yardımcı olur.",
+        "prompt": "Mevcut grafı kullanarak bu modül değişikliğinin etkisini açıkla.",
+        "flow": "Mevcut graf/ortamı inceler; ilgili ilişkileri sorgular; çıkarılan olguyla tahmini ayırır; görev kapsamındaki güncellemeyi yapar."
+      }
+    },
+    {
+      "id": "medical-evidence-research",
+      "category": "Health & rehabilitation",
+      "en": {
+        "purpose": "Search, appraise and synthesize medical evidence, including rehabilitation and Türkiye applicability.",
+        "prompt": "Compare exercise interventions for chronic low-back pain and assess applicability in Türkiye.",
+        "flow": "Frame the question; search international and local-context sources; appraise design/bias; synthesize effects, harms, certainty and applicability."
+      },
+      "tr": {
+        "purpose": "Rehabilitasyon ve Türkiye uygulanabilirliği dahil tıbbi kanıtı arar, değerlendirir ve sentezler.",
+        "prompt": "Kronik bel ağrısında egzersizleri karşılaştır; Türkiye’ye uygulanabilirliğini değerlendir.",
+        "flow": "Soruyu çerçeveler; uluslararası ve yerel bağlam kaynaklarını tarar; tasarım/yanlılığı inceler; etki, zarar ve uygulanabilirliği sentezler."
+      }
+    },
+    {
+      "id": "mental-health-crisis-support",
+      "category": "Health & rehabilitation",
+      "en": {
+        "purpose": "Support a calm, safety-oriented response to mental-health crisis signals.",
+        "prompt": "Help me respond supportively to someone who may be in immediate danger.",
+        "flow": "Prioritize immediate safety and direct communication; establish location when resources matter; offer appropriate human support without pretending to diagnose."
+      },
+      "tr": {
+        "purpose": "Ruh sağlığı kriz işaretlerine sakin ve güvenlik odaklı yanıt vermeyi destekler.",
+        "prompt": "Acil tehlikede olabilecek birine destekleyici biçimde nasıl yanıt verebilirim?",
+        "flow": "Önce acil güvenliği ve açık iletişimi gözetir; yerel kaynaklar için konumu netleştirir; tanı koymuş gibi yapmadan insan desteğine yönlendirir."
+      }
+    },
+    {
+      "id": "modern-web-guidance",
+      "category": "Build software",
+      "en": {
+        "purpose": "Choose current web patterns without forcing a new stack onto an existing project.",
+        "prompt": "Review this frontend approach for accessibility, performance and maintainability.",
+        "flow": "Identify the current stack and constraints; consult relevant modern patterns; compare tradeoffs; propose justified changes."
+      },
+      "tr": {
+        "purpose": "Mevcut projeye yeni stack dayatmadan güncel web yaklaşımları seçer.",
+        "prompt": "Bu frontend yaklaşımını erişilebilirlik, performans ve bakım açısından incele.",
+        "flow": "Stack ve kısıtları belirler; ilgili modern örüntüleri inceler; ödünleşimleri karşılaştırır; gerekçeli değişiklik önerir."
+      }
+    },
+    {
+      "id": "office-docs-qa",
+      "category": "Learn & write",
+      "en": {
+        "purpose": "Check document structure, content and presentation with explicit verification boundaries.",
+        "prompt": "Audit this workbook and report which checks actually ran.",
+        "flow": "Identify format and available tooling; inspect structure/content; check rendering when possible; separate file creation from native-app verification."
+      },
+      "tr": {
+        "purpose": "Belge yapısı, içerik ve görünümü açık doğrulama sınırlarıyla kontrol eder.",
+        "prompt": "Bu çalışma kitabını denetle; gerçekten yapılan kontrolleri bildir.",
+        "flow": "Biçim ve araçları belirler; yapıyı/içeriği inceler; mümkünse görünümü kontrol eder; üretimle native uygulama doğrulamasını ayırır."
+      }
+    },
+    {
+      "id": "parallel-web",
+      "category": "Research & analyze",
+      "en": {
+        "purpose": "Retain Parallel service documentation while routing this edition to existing no-extra-cost research tools.",
+        "prompt": "Research several sources without adding a paid research service.",
+        "flow": "Identify the research need; use available host search/fetch or local data; keep vendor-only examples as references; disclose unavailable capabilities."
+      },
+      "tr": {
+        "purpose": "Parallel belgelerini korur; bu sürümde ek ücret gerektirmeyen mevcut araştırma araçlarını kullanır.",
+        "prompt": "Ücretli araştırma servisi eklemeden birden fazla kaynağı araştır.",
+        "flow": "Araştırma ihtiyacını belirler; mevcut arama/fetch veya yerel veriyi kullanır; sağlayıcı örneklerini referans tutar; eksik kabiliyeti açıklar."
+      }
+    },
+    {
+      "id": "personal-tech-copilot",
+      "category": "Everyday workflows",
+      "en": {
+        "purpose": "Troubleshoot everyday devices, apps and setup using the tools actually available.",
+        "prompt": "Diagnose why this Windows application fails to start.",
+        "flow": "Inspect symptoms and environment; narrow likely causes; propose or perform scoped repairs; verify the observed result."
+      },
+      "tr": {
+        "purpose": "Günlük cihaz, uygulama ve kurulum sorunlarını mevcut araçlarla giderir.",
+        "prompt": "Bu Windows uygulamasının neden açılmadığını teşhis et.",
+        "flow": "Belirti ve ortamı inceler; nedenleri daraltır; kapsamlı olmayan hedefli onarım yapar/önerir; sonucu doğrular."
+      }
+    },
+    {
+      "id": "physio-clinical-copilot",
+      "category": "Health & rehabilitation",
+      "en": {
+        "purpose": "Support clinician-reviewed rehabilitation reasoning, assessment and draft planning.",
+        "prompt": "Draft an assessment framework for this rehabilitation case and identify missing information.",
+        "flow": "Organize the case; check red flags; select relevant assessment/outcomes; connect evidence to a draft and document uncertainty."
+      },
+      "tr": {
+        "purpose": "Klinisyen kontrolündeki rehabilitasyon akıl yürütmesi, değerlendirme ve taslak planlamayı destekler.",
+        "prompt": "Bu rehabilitasyon vakası için değerlendirme çerçevesi hazırla ve eksik bilgileri bul.",
+        "flow": "Vakayı düzenler; kırmızı bayrakları kontrol eder; değerlendirme/ölçüt seçer; kanıtı taslağa bağlayıp belirsizliği kaydeder."
+      }
+    },
+    {
+      "id": "plan-smart-routes",
+      "category": "Everyday workflows",
+      "en": {
+        "purpose": "Plan practical routes with mode choices, timing and honest live-data limits.",
+        "prompt": "Compare walking and transit options for this itinerary.",
+        "flow": "Identify origin/destination and constraints; compare feasible modes; reconcile transfers and timing; distinguish live data from estimates."
+      },
+      "tr": {
+        "purpose": "Ulaşım türü, zamanlama ve canlı veri sınırlarını gözeterek uygulanabilir rota planlar.",
+        "prompt": "Bu gezi için yürüyüş ve toplu taşıma seçeneklerini karşılaştır.",
+        "flow": "Başlangıç/bitiş ve kısıtları belirler; ulaşım türlerini karşılaştırır; aktarma/zamanı değerlendirir; canlı veriyle tahmini ayırır."
+      }
+    },
+    {
+      "id": "primary-source-research",
+      "category": "Research & analyze",
+      "en": {
+        "purpose": "Answer from official documents, specifications, source code and first-party records.",
+        "prompt": "Verify this API behavior from the official documentation and source.",
+        "flow": "Locate the source that owns the claim; inspect the relevant passage/version; reconcile contradictions; return citations in chat or a requested memo."
+      },
+      "tr": {
+        "purpose": "Resmî belge, spesifikasyon, kaynak kodu ve birincil kayıtlardan yanıt üretir.",
+        "prompt": "Bu API davranışını resmî doküman ve kaynaktan doğrula.",
+        "flow": "İddiayı taşıyan birincil kaynağı bulur; ilgili bölüm/sürümü inceler; çelişkileri karşılaştırır; kaynaklı yanıt veya istenen notu üretir."
+      }
+    },
+    {
+      "id": "purchase-advisor",
+      "category": "Everyday workflows",
+      "en": {
+        "purpose": "Compare product suitability, evidence and real total cost rather than promotional rankings.",
+        "prompt": "Compare these two products for my actual use case and budget.",
+        "flow": "Pin the exact model/market; define priorities; verify specs and independent evidence; compare total cost and tradeoffs."
+      },
+      "tr": {
+        "purpose": "Reklam sıralaması yerine ürün uygunluğunu, kanıtı ve gerçek toplam maliyeti karşılaştırır.",
+        "prompt": "Bu iki ürünü gerçek kullanımım ve bütçem için karşılaştır.",
+        "flow": "Kesin model/pazarı belirler; öncelikleri çıkarır; özellikleri ve bağımsız kanıtı doğrular; toplam maliyet ve ödünleşimleri karşılaştırır."
+      }
+    },
+    {
+      "id": "research-analyst",
+      "category": "Research & analyze",
+      "en": {
+        "purpose": "Coordinate quick or deep research, claim verification, synthesis and timestamped video analysis.",
+        "prompt": "Research this claim deeply, separate promotion from evidence and explain uncertainty.",
+        "flow": "Frame the decision; choose the lightest sufficient module; open original sources and counterevidence; synthesize with citations and coverage limits."
+      },
+      "tr": {
+        "purpose": "Hızlı/derin araştırma, iddia doğrulama, sentez ve zaman damgalı video analizini yönlendirir.",
+        "prompt": "Bu iddiayı derin araştır; tanıtımı kanıttan ayır ve belirsizliği açıkla.",
+        "flow": "Kararı çerçeveler; yeterli en hafif modülü seçer; özgün kaynak ve karşı kanıtı açar; atıf ve kapsam sınırlarıyla sentezler."
+      }
+    },
+    {
+      "id": "site-seo-audit",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Audit observable technical and content SEO without pretending recommendations were deployed.",
+        "prompt": "Review this site’s indexability, page structure and content discoverability.",
+        "flow": "Inspect accessible URLs and technical signals; assess content/structure; prioritize evidence-backed findings; separate audit from deployment."
+      },
+      "tr": {
+        "purpose": "Öneriler uygulanmış gibi göstermeden gözlenebilir teknik/içerik SEO denetimi yapar.",
+        "prompt": "Bu sitenin indekslenebilirliğini, sayfa yapısını ve içerik keşfini incele.",
+        "flow": "Erişilen URL ve teknik işaretleri inceler; içerik/yapıyı değerlendirir; kanıtlı bulguları önceliklendirir; denetimle yayını ayırır."
+      }
+    },
+    {
+      "id": "slides",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Structure a clear presentation with honest HTML, PDF and editable-slide distinctions.",
+        "prompt": "Turn this research summary into an academic presentation with citations.",
+        "flow": "Define audience and narrative; choose supported output format; build readable slides; check navigation, data and citations."
+      },
+      "tr": {
+        "purpose": "HTML, PDF ve düzenlenebilir slayt ayrımını koruyarak anlaşılır sunum yapılandırır.",
+        "prompt": "Bu araştırma özetini kaynaklı akademik sunuma dönüştür.",
+        "flow": "Kitle ve anlatıyı belirler; desteklenen biçimi seçer; okunabilir slaytları kurar; gezinme, veri ve atıfları kontrol eder."
+      }
+    },
+    {
+      "id": "ui-styling",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Implement interface styling that respects the project’s existing components and tokens.",
+        "prompt": "Style this form using the existing design system and accessible states.",
+        "flow": "Inspect components/tokens; map visual states and responsive behavior; implement locally; check consistency and keyboard usability."
+      },
+      "tr": {
+        "purpose": "Projenin mevcut bileşenlerini ve tokenlarını koruyan arayüz stili uygular.",
+        "prompt": "Bu formu mevcut tasarım sistemi ve erişilebilir durumlarla biçimlendir.",
+        "flow": "Bileşen/tokenları inceler; görsel durum ve responsive davranışı eşler; uygular; tutarlılık ve klavye kullanımını kontrol eder."
+      }
+    },
+    {
+      "id": "ui-ux-pro-max",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Search design intelligence across styles, palettes, typography, charts and platform stacks.",
+        "prompt": "Propose an accessible palette and type pairing for a clinical dashboard.",
+        "flow": "Form a product/domain query; use bundled local search data; select a coherent system; translate findings into implementation checks."
+      },
+      "tr": {
+        "purpose": "Stil, palet, tipografi, grafik ve platform stackleri arasında tasarım bilgisi arar.",
+        "prompt": "Klinik dashboard için erişilebilir palet ve font eşleştirmesi öner.",
+        "flow": "Ürün/alan sorgusu kurar; paketli yerel veriyi arar; tutarlı sistem seçer; bulguları uygulama kontrollerine çevirir."
+      }
+    },
+    {
+      "id": "web-animation",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Apply GSAP/Motion patterns while preserving accessibility and existing integrations.",
+        "prompt": "Add a restrained scroll reveal that respects reduced motion.",
+        "flow": "Inspect installed animation tooling; choose a suitable recipe; integrate with the current UI; assess motion preference and performance."
+      },
+      "tr": {
+        "purpose": "Erişilebilirlik ve mevcut entegrasyonu koruyarak GSAP/Motion örüntüleri uygular.",
+        "prompt": "Azaltılmış hareket tercihini gözeten sade kaydırma animasyonu ekle.",
+        "flow": "Kurulu araçları inceler; uygun tarifi seçer; mevcut arayüze entegre eder; hareket tercihi ve performansı değerlendirir."
+      }
+    },
+    {
+      "id": "web-ui-design",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Design interfaces around real tasks, hierarchy, responsiveness and accessibility.",
+        "prompt": "Redesign this settings page so the primary action is clear on small screens.",
+        "flow": "Understand user tasks; prioritize information/actions; design states/layout; review keyboard, contrast and responsive behavior."
+      },
+      "tr": {
+        "purpose": "Gerçek görev, hiyerarşi, responsive düzen ve erişilebilirlik etrafında arayüz tasarlar.",
+        "prompt": "Bu ayar sayfasını küçük ekranda ana eylem açık olacak şekilde yeniden tasarla.",
+        "flow": "Kullanıcı görevini anlar; bilgi/eylemi önceliklendirir; durum/düzen tasarlar; klavye, kontrast ve ekran uyumunu inceler."
+      }
+    },
+    {
+      "id": "yigit-investment-copilot",
+      "category": "Finance & decisions",
+      "en": {
+        "purpose": "Research BIST, TEFAS and US investments with valuation, scenarios and portfolio-risk checks.",
+        "prompt": "Evaluate this company’s filings and build a downside/base/upside scenario.",
+        "flow": "Verify instrument and dated evidence; compare statements/valuation; test scenarios and liquidity/cost assumptions; produce a decision framework, not an executed order."
+      },
+      "tr": {
+        "purpose": "Değerleme, senaryo ve portföy riski kontrolleriyle BIST, TEFAS ve ABD yatırımlarını araştırır.",
+        "prompt": "Bu şirketin açıklamalarını incele; kötü/temel/iyi senaryoları oluştur.",
+        "flow": "Varlığı ve tarihli kanıtı doğrular; tablo/değerlemeyi karşılaştırır; senaryo ve likidite/maliyet varsayımlarını sınar; emir değil karar çerçevesi üretir."
+      }
+    },
+    {
+      "id": "yigit-writer",
+      "category": "Learn & write",
+      "en": {
+        "purpose": "Write and revise clear messages, articles and academic prose without changing factual meaning.",
+        "prompt": "Rewrite this message in natural Turkish while preserving technical terms and numbers.",
+        "flow": "Identify audience and intent; preserve supplied facts/voice; draft or revise; check meaning, names, quantities and unsupported claims."
+      },
+      "tr": {
+        "purpose": "Olgusal anlamı değiştirmeden açık mesaj, yazı ve akademik metin üretir/düzenler.",
+        "prompt": "Bu mesajı teknik terim ve sayıları koruyarak doğal Türkçeyle düzenle.",
+        "flow": "Kitle ve amacı belirler; verilen bilgi/üslubu korur; yazar/düzenler; anlam, isim, miktar ve desteksiz iddiaları kontrol eder."
+      }
+    },
+    {
+      "id": "super-memory",
+      "category": "Build software",
+      "origin": "existing-public-companion",
+      "en": {
+        "purpose": "Keep compact, project-local handoffs and evidence across long sessions and different agents.",
+        "prompt": "Read the current project handoff, verify its state and continue the next unfinished task.",
+        "flow": "Locate the project memory; read the current packet and newer checkpoints; verify against files; update a compact handoff and agent cursor."
+      },
+      "tr": {
+        "purpose": "Uzun oturum ve farklı ajanlar arasında kısa, proje-yerel devir notları ve kanıtı korur.",
+        "prompt": "Güncel proje devir notunu oku, durumunu dosyalarla doğrula ve sıradaki işi sürdür.",
+        "flow": "Proje hafızasını bulur; güncel paket ve yeni kontrol noktalarını okur; dosyalarla doğrular; kısa devir notunu ve ajan imlecini günceller."
+      }
+    }
+  ],
+  "extra_collections": {
+    "super-memory": {
+      "title": "Super Memory",
+      "summary": "Project-local memory and evidence-based handoffs for long AI sessions.",
+      "summary_tr": "Uzun AI oturumları için proje-yerel hafıza ve kanıtlı devir notları.",
+      "skills": [
+        "super-memory"
+      ],
+      "topics": [
+        "agent-skills",
+        "project-memory",
+        "handoff",
+        "developer-tools"
+      ]
+    }
+  },
+  "collections": {
+    "universal-ai-skill-library": {
+      "title": "Universal AI Skill Library",
+      "summary": "Source-led workflows for development, design, research, clinical reasoning and everyday work.",
+      "summary_tr": "Geliştirme, tasarım, araştırma, klinik akıl yürütme ve günlük işler için kaynak temelli iş akışları.",
+      "skills": "*",
+      "topics": [
+        "agent-skills",
+        "ai-workflows",
+        "claude-code",
+        "chatgpt",
+        "bilingual"
+      ]
+    },
+    "ai-development-skills": {
+      "title": "AI Development Skills",
+      "summary": "Software delivery, AI tooling, current documentation and codebase understanding.",
+      "summary_tr": "Yazılım geliştirme, AI araçları, güncel dokümantasyon ve kod tabanını anlama iş akışları.",
+      "skills": [
+        "ai-agent-builder",
+        "ai-research-skills",
+        "caveman",
+        "coding-workflow",
+        "context7-mcp",
+        "find-docs",
+        "graphify",
+        "modern-web-guidance",
+        "personal-tech-copilot",
+        "primary-source-research"
+      ],
+      "topics": [
+        "agent-skills",
+        "software-engineering",
+        "ai-agents",
+        "claude-code"
+      ]
+    },
+    "design-content-skills": {
+      "title": "Design & Content Skills",
+      "summary": "Interface design, visual systems, writing, presentations and image/video workflows.",
+      "summary_tr": "Arayüz, görsel sistem, yazı, sunum ve görsel/video üretim iş akışları.",
+      "skills": [
+        "ai-image-video-studio",
+        "banner-design",
+        "brand",
+        "campaign-plan",
+        "design",
+        "design-system",
+        "office-docs-qa",
+        "site-seo-audit",
+        "slides",
+        "ui-styling",
+        "ui-ux-pro-max",
+        "web-animation",
+        "web-ui-design",
+        "yigit-writer"
+      ],
+      "topics": [
+        "agent-skills",
+        "design-systems",
+        "ui-ux",
+        "content-design",
+        "comfyui"
+      ]
+    },
+    "evidence-research-skills": {
+      "title": "Evidence & Research Skills",
+      "summary": "Source-led research, evidence appraisal, data analysis and research synthesis.",
+      "summary_tr": "Kaynak temelli araştırma, kanıt değerlendirme, veri analizi ve araştırma sentezi.",
+      "skills": [
+        "academic-study-coach",
+        "data-analyst",
+        "medical-evidence-research",
+        "office-docs-qa",
+        "parallel-web",
+        "primary-source-research",
+        "purchase-advisor",
+        "research-analyst"
+      ],
+      "topics": [
+        "agent-skills",
+        "research",
+        "evidence-based",
+        "data-analysis",
+        "literature-review"
+      ]
+    },
+    "physiotherapy-clinical-skills": {
+      "title": "Physiotherapy & Clinical Skills",
+      "summary": "Clinical reasoning, rehabilitation evidence, study support and crisis response workflows.",
+      "summary_tr": "Klinik akıl yürütme, rehabilitasyon kanıtları, öğrenme ve kriz desteği iş akışları.",
+      "skills": [
+        "academic-study-coach",
+        "medical-evidence-research",
+        "mental-health-crisis-support",
+        "physio-clinical-copilot"
+      ],
+      "topics": [
+        "agent-skills",
+        "physiotherapy",
+        "rehabilitation",
+        "clinical-reasoning",
+        "evidence-based"
+      ]
+    },
+    "yigit-investment-copilot": {
+      "title": "Investment Research Copilot",
+      "summary": "Investment research workflows for market evidence, scenarios, portfolio risk and decision plans.",
+      "summary_tr": "Piyasa kanıtları, senaryolar, portföy riski ve karar planları için yatırım araştırması iş akışları.",
+      "skills": [
+        "yigit-investment-copilot"
+      ],
+      "topics": [
+        "agent-skills",
+        "investment-research",
+        "bist",
+        "portfolio-risk",
+        "finance"
+      ],
+      "note": "Research only. Prices and availability depend on connected data sources; this skill does not place orders.",
+      "note_tr": "Yalnız araştırma içindir. Fiyatlar ve erişim bağlı veri kaynaklarına bağlıdır; bu skill emir göndermez."
+    },
+    "universal-ai-finance-skills": {
+      "title": "Finance Skills — Maintained Collection",
+      "summary": "The maintained finance collection: investment research, data analysis and purchase due diligence.",
+      "summary_tr": "Bakımı sürdürülen finans koleksiyonu: yatırım araştırması, veri analizi ve satın alma değerlendirmesi.",
+      "skills": [
+        "yigit-investment-copilot",
+        "data-analyst",
+        "purchase-advisor"
+      ],
+      "topics": [
+        "agent-skills",
+        "finance",
+        "investment-research",
+        "data-analysis"
+      ],
+      "migration": "The former finance catalog is retired. The three current entry points below replace it; the old catalog remains in Git history only.",
+      "migration_tr": "Önceki finans kataloğunun bakımı sona erdi. Yerini aşağıdaki üç güncel giriş noktası aldı; eski katalog yalnız Git geçmişinde korunuyor.",
+      "legacy_routes": {
+        "market / valuation / portfolio": "yigit-investment-copilot",
+        "statistics / analysis": "data-analyst",
+        "price / purchase assessment": "purchase-advisor"
+      }
+    },
+    "scientific-agent-skills": {
+      "title": "Scientific Skills — Maintained Collection",
+      "summary": "Maintained scientific workflows for literature, study, analysis, AI research and document quality.",
+      "summary_tr": "Literatür, öğrenme, analiz, AI araştırması ve belge kalitesi için güncel bilimsel iş akışları.",
+      "skills": [
+        "academic-study-coach",
+        "ai-research-skills",
+        "data-analyst",
+        "medical-evidence-research",
+        "office-docs-qa",
+        "research-analyst"
+      ],
+      "topics": [
+        "agent-skills",
+        "scientific-research",
+        "literature-review",
+        "data-analysis",
+        "research-tools"
+      ],
+      "migration": "The former 17-skill snapshot is no longer the maintained install set. Its relevant workflows now live in the six maintained hubs below and their modules; unsupported old entries are historical.",
+      "migration_tr": "Eski 17-skill sürümü artık güncel kurulum seti değildir. İlgili iş akışları aşağıdaki altı güncel merkez ve modüllerinde sürdürülür; karşılığı olmayan eski öğeler tarihseldir.",
+      "legacy_routes": {
+        "literature search / review / evidence": "medical-evidence-research",
+        "study / academic writing / presentations": "academic-study-coach",
+        "statistics / data": "data-analyst",
+        "AI training / experiments / papers": "ai-research-skills",
+        "research / synthesis": "research-analyst",
+        "documents / office QA": "office-docs-qa"
+      }
+    },
+    "map-skill": {
+      "title": "Smart Route Planning",
+      "summary": "Source-aware route planning with public transport, walking, scheduling and explicit live-data limits.",
+      "summary_tr": "Toplu taşıma, yürüyüş, zamanlama ve açık canlı veri sınırlarıyla kaynak temelli rota planlama.",
+      "skills": [
+        "plan-smart-routes"
+      ],
+      "topics": [
+        "agent-skills",
+        "route-planning",
+        "public-transport",
+        "maps"
+      ],
+      "migration": "Install plan-smart-routes instead of the former map-skill entry point. Provider capabilities are checked per request; map links are not proof of a live route.",
+      "migration_tr": "Eski map-skill yerine plan-smart-routes kurulur. Sağlayıcı yetenekleri her istekte doğrulanır; harita bağlantısı canlı rota kanıtı değildir.",
+      "legacy_routes": {
+        "map-skill": "plan-smart-routes"
+      }
+    },
+    "truth-first-counterargument-skill": {
+      "title": "Truth-First — Maintained Research Workflows",
+      "summary": "Claim verification, evidence integrity and decision challenges within the maintained research hub.",
+      "summary_tr": "Güncel araştırma merkezi içinde iddia doğrulama, kanıt bütünlüğü ve karar sorgulama.",
+      "skills": [
+        "research-analyst"
+      ],
+      "topics": [
+        "agent-skills",
+        "fact-checking",
+        "critical-thinking",
+        "evidence-based"
+      ],
+      "migration": "The standalone truth-first-counterargument skill is retired. Install research-analyst and use its evidence-integrity-guard, fact-check-workflow, source-verification and decision-council modules.",
+      "migration_tr": "Bağımsız truth-first-counterargument skill'inin bakımı sona erdi. research-analyst kurulur; evidence-integrity-guard, fact-check-workflow, source-verification ve decision-council modülleri kullanılır.",
+      "legacy_routes": {
+        "truth-first-counterargument": "research-analyst/modules/evidence-integrity-guard",
+        "counterargument / alternative hypotheses": "research-analyst/modules/decision-council",
+        "claim verification": "research-analyst/modules/fact-check-workflow",
+        "source credibility": "research-analyst/modules/source-verification"
+      }
+    },
+    "super-memory": {
+      "title": "Super Memory",
+      "summary": "Project-local memory and evidence-based handoffs for long AI sessions.",
+      "summary_tr": "Uzun AI oturumları için proje-yerel hafıza ve kanıtlı devir notları.",
+      "skills": [
+        "super-memory"
+      ],
+      "topics": [
+        "agent-skills",
+        "project-memory",
+        "handoff",
+        "developer-tools"
+      ]
+    }
+  }
+}

@@ -1,27 +1,54 @@
-<!-- CURRENT-SKILL-PUBLICATION -->
-![Investment Copilot](assets/collection-hero.svg)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
+  <img src="assets/hero-light.svg" width="1280" alt="Investment Research Copilot — clear questions, repeatable workflows, reviewable results">
+</picture>
 
-# Investment Copilot
+# Investment Research Copilot
 
-1 skill: kaynak araştırma, araç seçimi ve doğrulanabilir sonuç üretme için hazır iş akışları. Modelin ağırlıklarını değiştirmez; sonuç kalitesi kullanılan kaynaklara ve araçlara bağlıdır.
+[English](README.md) · [Türkçe](README.tr.md)
 
-[![Download ChatGPT](https://img.shields.io/badge/ChatGPT-Download_ZIP-10a37f?style=for-the-badge)](https://github.com/yigityildiz0/yigit-investment-copilot/raw/refs/heads/main/downloads/ChatGPT.zip) [![Download Claude](https://img.shields.io/badge/Claude-Download_ZIP-d97757?style=for-the-badge)](https://github.com/yigityildiz0/yigit-investment-copilot/raw/refs/heads/main/downloads/Claude.zip)
+**Piyasa kanıtları, senaryolar, portföy riski ve karar planları için yatırım araştırması iş akışları.**
 
-**ChatGPT:** bütün listelenen skilleri içeren eklenti paketini indir; hesabının desteklediği kişisel eklenti/skill içe aktarma akışını kullan. Tek-skill ChatGPT bağlantısı, tek skill içeren eklenti ZIP’idir. **Claude:** toplu ZIP’i aç, içindeki tekil skill ZIP’lerini ayrı ayrı yükle. Dış ZIP tek bir Claude skill’i değildir. Yerel kurulum bulut hesabına yükleme yapmaz.
+1 bakımı sürdürülen giriş noktası. Göreve göre birini seç; tüm kütüphaneyi bağlama yükleme.
 
-Türkçe veya İngilizce doğal isteklerle kullan; aşağıdaki örnekleri kendi soruna uyarla. Kısa kelimeler seçim ipuçlarıdır; bütün platformlarda aynı slash menüsünü oluşturmaz. Mevcut iş akışları ve güvenlik kuralları korunmuştur.
+[Başla](docs/INSTALL.md) · [Katalog](https://yigityildiz0.github.io/universal-ai-skill-library/) · [İndirmeler](DOWNLOADS.md) · [Bakım modeli](MAINTAINING.md)
 
-## Skill listesi
+## Yapmak istediğin işi seç
 
-| Skill | Çözdüğü sorun / örnek istek | ChatGPT | Claude |
-|---|---|---|---|
-| [`yigit-investment-copilot`](skills/common/yigit-investment-copilot/SKILL.md) | Borsa/fon araştır; portföy riskini değerlendir; emir göndermez | [↓ ZIP](packages/chatgpt/yigit-investment-copilot.zip) | [↓ ZIP](packages/claude/yigit-investment-copilot.zip) |
+<details open>
+<summary><strong>Finans ve karar</strong> · 1</summary>
 
-## Teknik bilgiler
+| Skill | Ne işe yarar? |
+|---|---|
+| [yigit-investment-copilot](docs/skills/yigit-investment-copilot.tr.md) | Değerleme, senaryo ve portföy riski kontrolleriyle BIST, TEFAS ve ABD yatırımlarını araştırır. |
 
-Claude açıklamaları en fazla 200 karakterdir; her skill paketi en fazla 200 dosya içerir. Kaynaklar, yardımcı betikler ve lisanslar paketlenir. API anahtarları, ücretli erişim, yerel CLI ve canlı veri bağlantıları paketin parçası değildir. Kontroller paket yapısını ve kaynak eşleşmesini doğrular; hesapta yükleme, klinik doğruluk veya yatırım performansı testi yapıldığı anlamına gelmez. [Bütünlük değerleri](downloads/SHA256SUMS.txt) · [Kaynak ve lisans bilgisi](THIRD_PARTY_NOTICES.md).
+</details>
 
-Research and education only: no autonomous orders, credential handling or return guarantees. / Araştırma ve eğitim; otomatik emir göndermez, getiri garanti etmez.
+## Bir skill nasıl çalışır?
 
-<!-- END-CURRENT-SKILL-PUBLICATION -->
+~~~mermaid
+flowchart LR
+ A[Your goal] --> B[Match the skill]
+ B --> C[Load relevant module]
+ C --> D[Use available tools]
+ D --> E[Verify and explain]
+~~~
 
+Bu bir iş akışıdır; araç çalıştırıldığı veya bütün sonuçların doğrulandığı iddiası değildir. Her skill sayfasında örnek istek, tetikleme, mekanik, girdi/çıktı ve kaynak modüller var.
+
+## Tek kaynak, kalıcı koleksiyonlar
+
+Ana kaynak [Universal AI Skill Library](https://github.com/yigityildiz0/universal-ai-skill-library). Alan depoları aynı sürümün seçilmiş görünümleridir; ayrı ayrı çatallanıp elle düzenlenmez. Mevcut bağlantılar ve geçmiş korunur.
+
+[All collections / Tüm koleksiyonlar](COLLECTIONS.md) · [Legacy/community resources](LEGACY.md) · [Licenses & provenance](docs/LICENSE-SCOPE.md)
+
+## Dürüst kapsam
+
+- Skill kurmak model eğitmek veya hesap/araç bağlamak değildir.
+- Yerel dosya ile web hesabına yükleme farklıdır; desteklenen host akışını kullan.
+- Ek ücretli API veya model indirme otomatik yapılmaz.
+- Eski topluluk kataloğu güncel giriş noktalarının sayısına veya test iddiasına dahil değildir.
+- Kaynak lisansları korunur; bütün üçüncü taraf içeriğine tek lisans varsayılmaz.
+
+---
+Maintained by [Yigit Yildiz](https://github.com/yigityildiz0) · Source edition 2026.10.11

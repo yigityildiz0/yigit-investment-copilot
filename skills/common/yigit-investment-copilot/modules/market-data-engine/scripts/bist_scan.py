@@ -91,6 +91,11 @@ def profile_for(days):
 
 
 def load_history(path):
+    from common import history_issues
+    problems = history_issues(path)
+    if problems:
+        print(f"History excluded {Path(path).name}: {'; '.join(problems)}", file=sys.stderr)
+        return []
     rows = read_csv(path)
     out = []
     for row in rows:

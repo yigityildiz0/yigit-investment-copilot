@@ -36,6 +36,12 @@ def read_rows(path):
 
 
 def load_series(path):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "market-data-engine" / "scripts"))
+    from common import history_issues
+    problems = history_issues(path)
+    if problems:
+        print(f"History excluded {Path(path).name}: {'; '.join(problems)}", file=sys.stderr)
+        return []
     out = []
     for r in read_rows(path):
         c = fnum(r.get("adj_close")) or fnum(r.get("close"))
