@@ -209,35 +209,58 @@ def cloud_parts(name, mapping, limit=200):
                    "modules": module_parts, "files": coverage}
 
 
-def fit_claude_upload(name, files, release_date="2026-01-01", reserve=190):
-    """Claude.ai rejects an uploaded skill ZIP with more than 200 files and treats two ZIPs as two skills.
-
-    For a skill above `reserve` files, keep the entry point, licences, yigit/ notes and every MODULE.md as
-    loose files and pack all other supporting files into ONE `resources.zip` inside the same skill, with the
-    same relative paths. SKILL.md gets a note telling the model how to read them. Smaller skills are unchanged.
+def fit_claude_upload(name, files, release_date="2026-01-01", reserve=190, bundle_bytes=1_500_000):
+    """Claude.ai rejects an uploaded skill with more than 200 files, treats two ZIPs as two skills and
+    refuses nested ZIP files. For a skill above `reserve` files, keep the entry point, licences, yigit/ notes
+    and every MODULE.md as loose files and concatenate the other TEXT files into a few `resources/bundle-NN.md`
+    files (each file delimited by marker lines) plus `resources/INDEX.md` mapping every original path to its bundle.
+    Binary files stay loose. SKILL.md gets a note on how to read a bundled file. Smaller skills are unchanged.
     """
     if len(files) <= reserve:
         return files
-    keep, moved = {}, {}
-    for rel, data in files.items():
+    keep, text_files = {}, {}
+    for rel, data in sorted(files.items()):
         top = rel.split("/")[0]
         base = rel.rsplit("/", 1)[-1].upper()
         loose = (rel == "SKILL.md" or base.startswith(("LICENSE", "NOTICE", "COPYING")) or rel.endswith("/MODULE.md")
                  or (top == "yigit" and rel.count("/") == 1))
-        (keep if loose else moved)[rel] = data
-    if not moved:
-        raise ValueError(f"{name}: {len(files)} files and nothing movable")
-    if len(keep) + 1 > reserve:
-        raise ValueError(f"{name}: {len(keep)} loose files exceed the Claude upload budget")
-    keep["resources.zip"] = zip_bytes(moved, release_date)
+        if loose:
+            keep[rel] = data
+            continue
+        try:
+            text_files[rel] = data.decode("utf-8")
+        except UnicodeDecodeError:
+            keep[rel] = data                      # binary (for example PDF) stays loose
+    if not text_files:
+        raise ValueError(f"{name}: {len(files)} files and nothing to bundle")
+    bundles, cur, size = [], {}, 0
+    for rel, text in text_files.items():
+        if cur and size + len(text) > bundle_bytes:
+            bundles.append(cur)
+            cur, size = {}, 0
+        cur[rel] = text
+        size += len(text)
+    if cur:
+        bundles.append(cur)
+    index = ["# Bundled files", "", "Original path | bundle file | bytes", "---|---|---"]
+    for i, group in enumerate(bundles, 1):
+        bname = f"resources/bundle-{i:02d}.md"
+        parts = []
+        for rel, text in group.items():
+            parts.append(f"=== FILE: {rel} ===" + chr(10) + text.rstrip(chr(10)) + chr(10) + "=== END FILE ===" + chr(10))
+            index.append(f"{rel} | {bname} | {len(text.encode('utf-8'))}")
+        keep[bname] = (chr(10) * 2).join(parts).encode("utf-8")
+    keep["resources/INDEX.md"] = (chr(10).join(index) + chr(10)).encode("utf-8")
+    if len(keep) > reserve:
+        raise ValueError(f"{name}: {len(keep)} files still exceed the Claude upload budget")
+    note = (chr(10) + "## Bundled resources (read this first)" + chr(10) * 2 +
+            "Claude.ai accepts at most 200 files per uploaded skill and no nested ZIPs, so " + str(len(text_files)) +
+            " supporting text files (references, templates, scripts, examples) are concatenated into `resources/bundle-NN.md`. "
+            "MODULE.md files and this entry point are loose and complete. When a module links to a file that is not present as a loose file, "
+            "look it up in `resources/INDEX.md` (original path, bundle file), then read only that part, for example: "
+            "`grep -n \"=== FILE: modules/<module>/references/<file> ===\" resources/bundle-NN.md` and `sed -n 'START,ENDp' resources/bundle-NN.md` "
+            "(the section ends at the next `=== END FILE ===`). Never report such a file as missing, and never load a whole bundle into context." + chr(10))
     text = keep["SKILL.md"].decode("utf-8")
-    note = ("\n## Packed resources (read this first)\n\n"
-            "Claude.ai accepts at most 200 files per uploaded skill, so " + str(len(moved)) + " supporting files (references, assets, scripts, examples) "
-            "are packed in `resources.zip` in this skill folder, with the SAME relative paths as the links in SKILL.md and each MODULE.md. "
-            "When a module links to a file that is not present as a loose file, read it from the archive instead of reporting it missing: "
-            "`python -c \"import zipfile; print(zipfile.ZipFile('resources.zip').read('modules/<module>/references/<file>').decode())\"` "
-            "or extract once with `python -m zipfile -e resources.zip resources/` and open `resources/<same path>`. "
-            "MODULE.md files and the entry point are loose and complete." "")
     end = text.find("---", 3)
     keep["SKILL.md"] = (text[:end + 3] + note + text[end + 3:]).encode("utf-8")
     return keep

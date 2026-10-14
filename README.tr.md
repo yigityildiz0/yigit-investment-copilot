@@ -7,7 +7,7 @@
 
 [English](README.md) · [Türkçe](README.tr.md)
 
-![Edition](https://img.shields.io/badge/edition-2026.10.14.3-0f6e8c) [![Validate](https://github.com/yigityildiz0/yigit-investment-copilot/actions/workflows/validate.yml/badge.svg)](https://github.com/yigityildiz0/yigit-investment-copilot/actions/workflows/validate.yml) [![Release](https://img.shields.io/github/v/release/yigityildiz0/yigit-investment-copilot?display_name=tag&sort=date)](https://github.com/yigityildiz0/yigit-investment-copilot/releases/latest) ![Skills](https://img.shields.io/badge/skill-1-b0303f) ![Languages](https://img.shields.io/badge/EN%20%2B%20TR-guides-e0a43a)
+![Edition](https://img.shields.io/badge/edition-2026.10.14.4-0f6e8c) [![Validate](https://github.com/yigityildiz0/yigit-investment-copilot/actions/workflows/validate.yml/badge.svg)](https://github.com/yigityildiz0/yigit-investment-copilot/actions/workflows/validate.yml) [![Release](https://img.shields.io/github/v/release/yigityildiz0/yigit-investment-copilot?display_name=tag&sort=date)](https://github.com/yigityildiz0/yigit-investment-copilot/releases/latest) ![Skills](https://img.shields.io/badge/skill-1-b0303f) ![Languages](https://img.shields.io/badge/EN%20%2B%20TR-guides-e0a43a)
 
 **Piyasa kanıtları, senaryolar, portföy riski ve karar planları için yatırım araştırması iş akışları.**
 
@@ -15,11 +15,11 @@
 
 [Başla](docs/INSTALL.md) · [Katalog](https://yigityildiz0.github.io/universal-ai-skill-library/) · [İndirmeler](DOWNLOADS.md) · [Bakım modeli](MAINTAINING.md)
 
-## Bu sürümde yeni (2026.10.14.3)
+## Bu sürümde yeni (2026.10.14.4)
 
 - Gemini paketleri (CLI klasörleri ve filtreli Gemini uygulaması yüklemeleri), her uygulama için kurulum tablosu ve SHA-256 özetli gerçek GitHub Release.
 - Her uygulama için skill başına tek ZIP, parçalara bölünmez; masaüstü sürümünde Claude için toplu yükleme grupları var.
-- Claude.ai yükleme düzeltmesi: büyük skill'ler 200 dosya sınırının altında TEK skill olarak kalır (yardımcı dosyalar skill içinde resources.zip'e paketlenir).
+- Claude.ai yükleme düzeltmesi: büyük skill'ler 200 dosya sınırının altında, iç içe ZIP olmadan TEK skill olarak kalır (yardımcı metin dosyaları INDEX ile resources/bundle-NN.md içinde birleşik).
 
 ## Hangi uygulamada?
 
@@ -72,4 +72,4 @@ Ana kaynak [Universal AI Skill Library](https://github.com/yigityildiz0/universa
 - Kaynak lisansları korunur; bütün üçüncü taraf içeriğine tek lisans varsayılmaz.
 
 ---
-Maintained by [Yigit Yildiz](https://github.com/yigityildiz0) · Source edition 2026.10.14.3
+Maintained by [Yigit Yildiz](https://github.com/yigityildiz0) · Source edition 2026.10.14.4

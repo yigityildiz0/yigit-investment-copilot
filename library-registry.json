@@ -2,7 +2,7 @@
   "schema_version": 1,
   "owner": "yigityildiz0",
   "canonical_repository": "universal-ai-skill-library",
-  "release": "2026.10.14.3",
+  "release": "2026.10.14.4",
   "skills": [
     {
       "id": "academic-study-coach",
@@ -577,7 +577,7 @@
         "text": "One ZIP per skill for every app, never split into parts; Claude gets grouped bulk-upload ZIPs on the Desktop edition."
       },
       {
-        "text": "Claude.ai upload fix: large skills stay ONE skill under the 200-file limit (supporting files packed in resources.zip inside the skill)."
+        "text": "Claude.ai upload fix: large skills stay ONE skill under the 200-file limit and without nested ZIPs (supporting text files bundled in resources/bundle-NN.md with an INDEX)."
       }
     ],
     "tr": [
@@ -616,7 +616,7 @@
         "text": "Her uygulama için skill başına tek ZIP, parçalara bölünmez; masaüstü sürümünde Claude için toplu yükleme grupları var."
       },
       {
-        "text": "Claude.ai yükleme düzeltmesi: büyük skill'ler 200 dosya sınırının altında TEK skill olarak kalır (yardımcı dosyalar skill içinde resources.zip'e paketlenir)."
+        "text": "Claude.ai yükleme düzeltmesi: büyük skill'ler 200 dosya sınırının altında, iç içe ZIP olmadan TEK skill olarak kalır (yardımcı metin dosyaları INDEX ile resources/bundle-NN.md içinde birleşik)."
       }
     ]
   },
