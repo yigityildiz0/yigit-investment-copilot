@@ -11,7 +11,7 @@ import library_views as views
 from library_site import site
 from publication_docs import INSTALL, MAINTAINING, LEGACY, LICENSE_SCOPE
 import build_host_variants as host
-from compact_desktop_packages import cloud_parts, plugin_files
+from compact_desktop_packages import cloud_parts, plugin_files, gemini_web_payload
 
 def put(root,path,text):
     p=root/path;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(text.rstrip()+'\n',encoding='utf-8',newline='\n')
@@ -41,7 +41,7 @@ def build(root):
         if not re.fullmatch('[a-z0-9]+(?:-[a-z0-9]+)*',name) or not (common/name/'SKILL.md').is_file():raise ValueError('Missing or invalid root '+name)
     title=meta['title']
     for lang in ('en','tr'):
-        put(root,'README'+('.tr' if lang=='tr' else '')+'.md',views.readme(reg,selected,title,meta['summary_tr' if lang=='tr' else 'summary'],lang))
+        put(root,'README'+('.tr' if lang=='tr' else '')+'.md',views.readme(reg,selected,title,meta['summary_tr' if lang=='tr' else 'summary'],lang,meta['repository']))
         for s in selected:put(root,f'docs/skills/{s["id"]}.{lang}.md',views.skill_page(s,common,lang))
     for theme in ('dark','light'):
         put(root,f'assets/hero-{theme}.svg',views.hero(title,'Clear questions. Repeatable workflows. Reviewable results.',str(len(selected))+' MAINTAINED WORKFLOWS',theme))
@@ -51,7 +51,7 @@ def build(root):
     if not history.exists():html=html.replace('legacy-index.html','https://github.com/yigityildiz0/universal-ai-skill-library/blob/main/LEGACY.md')
     put(root,'docs/index.html',html)
     put(root,'docs/favicon.svg','<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#101c29"/><path d="M17 17L32 34L47 17M32 34V49" fill="none" stroke="#8fe0cd" stroke-width="5" stroke-linecap="round"/></svg>')
-    portable={};codex={};gpt_skills={};claude_files={};download_rows=[];claude_counts={};coverage={}
+    portable={};codex={};gpt_skills={};claude_files={};gemini_files={};download_rows=[];claude_counts={};coverage={}
     for name in chosen:
         mapping=source_map(common/name)
         portable.update({name+'/'+k:v for k,v in mapping.items()})
@@ -67,13 +67,14 @@ def build(root):
             blob=pack({upload+'/'+k:v for k,v in payload.items()});filename=upload+'.zip'
             binary(root,'packages/claude/'+filename,blob);claude_files[filename]=blob;part_names.append(filename)
         claude_counts[name]=len(part_names)
+        gem=pack({name+'/'+k:v for k,v in gemini_web_payload(name,gpt).items()});binary(root,f'packages/gemini/{name}.zip',gem);gemini_files[name+'.zip']=gem
         links=' · '.join(f'[{i+1}](packages/claude/{p})' for i,p in enumerate(part_names))
-        download_rows.append(f'| [{name}](docs/skills/{name}.en.md) | [Source](packages/portable/{name}.zip) | [OpenAI plugin](packages/chatgpt/{name}.zip) | {links} |')
-    binary(root,'downloads/portable-skills.zip',pack(portable));binary(root,'downloads/Codex.zip',pack(codex));binary(root,'downloads/Claude.zip',pack(claude_files))
+        download_rows.append(f'| [{name}](docs/skills/{name}.en.md) | [Source](packages/portable/{name}.zip) | [OpenAI plugin](packages/chatgpt/{name}.zip) | {links} | [Gemini app](packages/gemini/{name}.zip) |')
+    binary(root,'downloads/portable-skills.zip',pack(portable));binary(root,'downloads/Gemini.zip',pack(gemini_files));binary(root,'downloads/Codex.zip',pack(codex));binary(root,'downloads/Claude.zip',pack(claude_files))
     plugin=plugin_files(gpt_skills,{'version':reg['release']},meta['repository'],provider='codex')
     jput(root,'claude-coverage.json',coverage)
     binary(root,'downloads/ChatGPT.zip',pack(plugin))
-    put(root,'DOWNLOADS.md','# Downloads / İndirmeler\n\n[Portable sources](downloads/portable-skills.zip) · [Codex local folders](downloads/Codex.zip) · [OpenAI-compatible plugin bundle](downloads/ChatGPT.zip) · [Claude upload collection](downloads/Claude.zip)\n\nA plugin bundle needs a compatible host. Uploading a ZIP to GPT Knowledge does not install tools or executable skills. Unpack the Claude collection and upload individual part ZIPs; the outer ZIP is not one skill. Local folders and cloud-account imports differ. / Plugin paketi uyumlu host gerektirir. GPT Knowledge yüklemesi araç kurmaz. Claude dış ZIP açılır; içindeki skill/parça ZIPleri ayrı yüklenir.\n\n| Skill | Portable | Compatible OpenAI host | Claude parts |\n|---|---|---|---|\n'+'\n'.join(download_rows)+'\n\nFor a partitioned skill, include its routing root and supporting parts together. Do not rename/delete support files. / Parçalı skill için yönlendirme kökü ve destek parçaları birlikte gerekir.\n')
+    put(root,'DOWNLOADS.md','# Downloads / İndirmeler\n\n[Portable sources](downloads/portable-skills.zip) · [Codex local folders](downloads/Codex.zip) · [OpenAI-compatible plugin bundle](downloads/ChatGPT.zip) · [Claude upload collection](downloads/Claude.zip) · [Gemini app uploads](downloads/Gemini.zip)\n\nGemini CLI, OpenCode and DeepSeek Harness use the portable sources. / Gemini CLI, OpenCode ve DeepSeek Harness taşınabilir kaynakları kullanır.\n\nA plugin bundle needs a compatible host. Uploading a ZIP to GPT Knowledge does not install tools or executable skills. Unpack the Claude collection and upload individual part ZIPs; the outer ZIP is not one skill. Local folders and cloud-account imports differ. / Plugin paketi uyumlu host gerektirir. GPT Knowledge yüklemesi araç kurmaz. Claude dış ZIP açılır; içindeki skill/parça ZIPleri ayrı yüklenir.\n\n| Skill | Portable | Compatible OpenAI host | Claude parts | Gemini app |\n|---|---|---|---|---|\n'+'\n'.join(download_rows)+'\n\nFor a partitioned skill, include its routing root and supporting parts together. Do not rename/delete support files. / Parçalı skill için yönlendirme kökü ve destek parçaları birlikte gerekir.\n')
     put(root,'docs/INSTALL.md',INSTALL)
     put(root,'INSTALL.md','# Installation\n\n[Current bilingual platform guide](docs/INSTALL.md) · [Downloads](DOWNLOADS.md).\n\nGüncel platform rehberi ve Türkçe bölüm aynı belgede bulunur. Eski paket bağlantıları kurulum başarısı kanıtı değildir.\n')
     put(root,'INSTALL.tr.md','# Kurulum\n\n[Güncel iki dilli rehber](docs/INSTALL.md) · [İndirmeler](DOWNLOADS.md).\n')
@@ -82,7 +83,7 @@ def build(root):
     for name,item in reg['collections'].items():links.append(f'| [{item["title"]}](https://github.com/{reg["owner"]}/{name}) | {item["summary"]}<br>{item["summary_tr"]} |')
     links+=['','[Super Memory](https://github.com/yigityildiz0/super-memory) is included in the canonical library; its existing repository remains a focused view of the same source.']
     put(root,'COLLECTIONS.md','\n'.join(links))
-    hashes={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for directory in ('downloads','packages/portable','packages/chatgpt','packages/claude') for p in (root/directory).glob('*.zip') if p.is_file() and ((p.parent.name=='downloads' and p.name in {'portable-skills.zip','Codex.zip','Claude.zip','ChatGPT.zip'}) or (p.parent.name=='claude' and p.name in claude_files) or (p.parent.name in {'portable','chatgpt'} and p.stem in chosen))}
+    hashes={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for directory in ('downloads','packages/portable','packages/chatgpt','packages/claude','packages/gemini') for p in (root/directory).glob('*.zip') if p.is_file() and ((p.parent.name=='downloads' and p.name in {'portable-skills.zip','Codex.zip','Claude.zip','ChatGPT.zip','Gemini.zip'}) or (p.parent.name=='claude' and p.name in claude_files) or (p.parent.name in {'portable','chatgpt','gemini'} and p.stem in chosen))}
     put(root,'downloads/SHA256SUMS-current.txt','\n'.join(f'{digest}  {path}' for path,digest in sorted(hashes.items())))
     current={'edition':reg['release'],'repository':meta['repository'],'canonical':reg['canonical_repository'],'skills':chosen,'claude_parts':claude_counts,'artifact_sha256':hashes,'validation_scope':'structure, hashes and archives; not live account activation or clinical/financial efficacy'}
     jput(root,'current-release.json',current)

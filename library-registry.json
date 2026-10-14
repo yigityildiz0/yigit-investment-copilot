@@ -2,7 +2,7 @@
   "schema_version": 1,
   "owner": "yigityildiz0",
   "canonical_repository": "universal-ai-skill-library",
-  "release": "2026.10.11",
+  "release": "2026.10.14",
   "skills": [
     {
       "id": "academic-study-coach",
@@ -159,20 +159,6 @@
       }
     },
     {
-      "id": "design-system",
-      "category": "Design & create",
-      "en": {
-        "purpose": "Connect design tokens, component specifications and audience-appropriate presentations.",
-        "prompt": "Create semantic chart colors and an accessible academic slide system.",
-        "flow": "Audit existing tokens; define semantic roles; map components; select HTML or editable presentation requirements; check consistency."
-      },
-      "tr": {
-        "purpose": "Tasarım tokenları, bileşen özellikleri ve hedef kitleye uygun sunumları bağlar.",
-        "prompt": "Semantik grafik renkleri ve erişilebilir akademik sunum sistemi oluştur.",
-        "flow": "Mevcut tokenları inceler; semantik rolleri belirler; bileşenleri eşler; çıktı biçimini seçer; tutarlılığı kontrol eder."
-      }
-    },
-    {
       "id": "design",
       "category": "Design & create",
       "en": {
@@ -184,6 +170,20 @@
         "purpose": "Tasarım işini uygun marka, arayüz, ikon, banner veya sunum akışına yönlendirir.",
         "prompt": "Bu GitHub portföyü için tutarlı görsel yön geliştir.",
         "flow": "İletişim hedefini netleştirir; ilgili uzmanlığı seçer; mevcut varlıkları kullanır; çıktıyı kontrol eder."
+      }
+    },
+    {
+      "id": "design-system",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Connect design tokens, component specifications and audience-appropriate presentations.",
+        "prompt": "Create semantic chart colors and an accessible academic slide system.",
+        "flow": "Audit existing tokens; define semantic roles; map components; select HTML or editable presentation requirements; check consistency."
+      },
+      "tr": {
+        "purpose": "Tasarım tokenları, bileşen özellikleri ve hedef kitleye uygun sunumları bağlar.",
+        "prompt": "Semantik grafik renkleri ve erişilebilir akademik sunum sistemi oluştur.",
+        "flow": "Mevcut tokenları inceler; semantik rolleri belirler; bileşenleri eşler; çıktı biçimini seçer; tutarlılığı kontrol eder."
       }
     },
     {
@@ -212,6 +212,20 @@
         "purpose": "Bilgi grafıyla kod, belge ve araştırma arasındaki ilişkileri anlamaya yardımcı olur.",
         "prompt": "Mevcut grafı kullanarak bu modül değişikliğinin etkisini açıkla.",
         "flow": "Mevcut graf/ortamı inceler; ilgili ilişkileri sorgular; çıkarılan olguyla tahmini ayırır; görev kapsamındaki güncellemeyi yapar."
+      }
+    },
+    {
+      "id": "html-slides",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Build browser-based HTML presentations with Chart.js, design tokens and responsive layouts; PowerPoint decks belong to presentation-studio.",
+        "prompt": "Turn this product update into an interactive HTML slide deck for our website.",
+        "flow": "Confirm a browser deck is wanted; define narrative; apply tokens and layouts; check navigation, charts and responsiveness."
+      },
+      "tr": {
+        "purpose": "Chart.js, tasarım token'ları ve duyarlı yerleşimle tarayıcıda çalışan HTML sunumlar; PowerPoint sunumları presentation-studio'ya aittir.",
+        "prompt": "Bu ürün güncellemesini web sitemiz için etkileşimli HTML slayta dönüştür.",
+        "flow": "Tarayıcı sunumu istendiğini doğrular; anlatıyı kurar; token ve yerleşimleri uygular; gezinme, grafik ve uyumluluğu kontrol eder."
       }
     },
     {
@@ -327,6 +341,20 @@
       }
     },
     {
+      "id": "presentation-studio",
+      "category": "Design & create",
+      "en": {
+        "purpose": "Make complete, editable PowerPoint decks: course rules as defaults, slide plan, real licensed photos, a design kit, timed speaker notes with pronunciations, rendered QA and an audit.",
+        "prompt": "Prepare a 35-minute PPTX lecture on measuring muscle strength, with speaker notes, a PDF and a pre-talk reading guide.",
+        "flow": "Brief and rules; verified claims; slide plan with layout and visual per slide; images; deck kit build; 4-slide sample gate; render, inspect, fix; audit; deliver PPTX, PDF and reading guide."
+      },
+      "tr": {
+        "purpose": "Düzenlenebilir PowerPoint sunumunu baştan sona hazırlar: hoca kuralları varsayılan, slayt planı, lisanslı gerçek fotoğraflar, tasarım kiti, süreli ve okunuşlu konuşmacı notları, render kontrolü ve denetim.",
+        "prompt": "Kas kuvvetinin ölçümü üzerine 35 dakikalık PPTX ders sunumu hazırla; konuşmacı notları, PDF ve sunum öncesi okuma kılavuzu da olsun.",
+        "flow": "Brief ve kurallar; doğrulanmış iddialar; her slayt için yerleşim ve görsel planı; görseller; kitle derleme; 4 slaytlık örnek kapısı; render, inceleme, düzeltme; denetim; PPTX, PDF ve okuma kılavuzu teslimi."
+      }
+    },
+    {
       "id": "primary-source-research",
       "category": "Research & analyze",
       "en": {
@@ -383,17 +411,18 @@
       }
     },
     {
-      "id": "slides",
-      "category": "Design & create",
+      "id": "super-memory",
+      "category": "Build software",
+      "origin": "existing-public-companion",
       "en": {
-        "purpose": "Structure a clear presentation with honest HTML, PDF and editable-slide distinctions.",
-        "prompt": "Turn this research summary into an academic presentation with citations.",
-        "flow": "Define audience and narrative; choose supported output format; build readable slides; check navigation, data and citations."
+        "purpose": "Keep compact, project-local handoffs and evidence across long sessions and different agents.",
+        "prompt": "Read the current project handoff, verify its state and continue the next unfinished task.",
+        "flow": "Locate the project memory; read the current packet and newer checkpoints; verify against files; update a compact handoff and agent cursor."
       },
       "tr": {
-        "purpose": "HTML, PDF ve düzenlenebilir slayt ayrımını koruyarak anlaşılır sunum yapılandırır.",
-        "prompt": "Bu araştırma özetini kaynaklı akademik sunuma dönüştür.",
-        "flow": "Kitle ve anlatıyı belirler; desteklenen biçimi seçer; okunabilir slaytları kurar; gezinme, veri ve atıfları kontrol eder."
+        "purpose": "Uzun oturum ve farklı ajanlar arasında kısa, proje-yerel devir notları ve kanıtı korur.",
+        "prompt": "Güncel proje devir notunu oku, durumunu dosyalarla doğrula ve sıradaki işi sürdür.",
+        "flow": "Proje hafızasını bulur; güncel paket ve yeni kontrol noktalarını okur; dosyalarla doğrular; kısa devir notunu ve ajan imlecini günceller."
       }
     },
     {
@@ -479,21 +508,6 @@
         "prompt": "Bu mesajı teknik terim ve sayıları koruyarak doğal Türkçeyle düzenle.",
         "flow": "Kitle ve amacı belirler; verilen bilgi/üslubu korur; yazar/düzenler; anlam, isim, miktar ve desteksiz iddiaları kontrol eder."
       }
-    },
-    {
-      "id": "super-memory",
-      "category": "Build software",
-      "origin": "existing-public-companion",
-      "en": {
-        "purpose": "Keep compact, project-local handoffs and evidence across long sessions and different agents.",
-        "prompt": "Read the current project handoff, verify its state and continue the next unfinished task.",
-        "flow": "Locate the project memory; read the current packet and newer checkpoints; verify against files; update a compact handoff and agent cursor."
-      },
-      "tr": {
-        "purpose": "Uzun oturum ve farklı ajanlar arasında kısa, proje-yerel devir notları ve kanıtı korur.",
-        "prompt": "Güncel proje devir notunu oku, durumunu dosyalarla doğrula ve sıradaki işi sürdür.",
-        "flow": "Proje hafızasını bulur; güncel paket ve yeni kontrol noktalarını okur; dosyalarla doğrular; kısa devir notunu ve ajan imlecini günceller."
-      }
     }
   ],
   "extra_collections": {
@@ -511,6 +525,62 @@
         "developer-tools"
       ]
     }
+  },
+  "release_notes": {
+    "en": [
+      {
+        "text": "**presentation-studio** (new): complete editable PowerPoint decks — course rules as defaults, slide plan, real licensed photos, JS and Python deck kits, timed speaker notes with pronunciations, PowerPoint render QA, `pptx_audit.py` and a pre-talk reading guide.",
+        "skills": [
+          "presentation-studio"
+        ]
+      },
+      {
+        "text": "`slides` is renamed **html-slides** and only handles browser decks; PowerPoint requests route to presentation-studio.",
+        "skills": [
+          "html-slides",
+          "presentation-studio"
+        ]
+      },
+      {
+        "text": "academic-study-coach, office-docs-qa, design and design-system now hand deck building to presentation-studio (fixes a broken PPTX QA link).",
+        "skills": [
+          "academic-study-coach",
+          "office-docs-qa",
+          "design",
+          "design-system"
+        ]
+      },
+      {
+        "text": "Gemini packages (CLI folders and filtered Gemini app uploads), an installation table for every app and a real GitHub Release with SHA-256 checksums."
+      }
+    ],
+    "tr": [
+      {
+        "text": "**presentation-studio** (yeni): düzenlenebilir PowerPoint sunumu baştan sona — hoca kuralları varsayılan, slayt planı, lisanslı gerçek fotoğraflar, JS ve Python tasarım kitleri, süreli ve okunuşlu konuşmacı notları, PowerPoint render kontrolü, `pptx_audit.py` ve sunum öncesi okuma kılavuzu.",
+        "skills": [
+          "presentation-studio"
+        ]
+      },
+      {
+        "text": "`slides` artık **html-slides**: yalnız tarayıcı sunumları; PowerPoint istekleri presentation-studio'ya gider.",
+        "skills": [
+          "html-slides",
+          "presentation-studio"
+        ]
+      },
+      {
+        "text": "academic-study-coach, office-docs-qa, design ve design-system sunum üretimini presentation-studio'ya devreder (kırık PPTX bağlantısı düzeltildi).",
+        "skills": [
+          "academic-study-coach",
+          "office-docs-qa",
+          "design",
+          "design-system"
+        ]
+      },
+      {
+        "text": "Gemini paketleri (CLI klasörleri ve filtreli Gemini uygulaması yüklemeleri), her uygulama için kurulum tablosu ve SHA-256 özetli gerçek GitHub Release."
+      }
+    ]
   },
   "collections": {
     "universal-ai-skill-library": {
@@ -551,8 +621,8 @@
     },
     "design-content-skills": {
       "title": "Design & Content Skills",
-      "summary": "Interface design, visual systems, writing, presentations and image/video workflows.",
-      "summary_tr": "Arayüz, görsel sistem, yazı, sunum ve görsel/video üretim iş akışları.",
+      "summary": "Interface design, visual systems, writing, editable PowerPoint decks, HTML slides and image/video workflows.",
+      "summary_tr": "Arayüz, görsel sistem, yazı, düzenlenebilir PowerPoint sunumları, HTML slayt ve görsel/video iş akışları.",
       "skills": [
         "ai-image-video-studio",
         "banner-design",
@@ -560,9 +630,10 @@
         "campaign-plan",
         "design",
         "design-system",
+        "html-slides",
         "office-docs-qa",
+        "presentation-studio",
         "site-seo-audit",
-        "slides",
         "ui-styling",
         "ui-ux-pro-max",
         "web-animation",
@@ -587,6 +658,7 @@
         "medical-evidence-research",
         "office-docs-qa",
         "parallel-web",
+        "presentation-studio",
         "primary-source-research",
         "purchase-advisor",
         "research-analyst"
@@ -607,7 +679,8 @@
         "academic-study-coach",
         "medical-evidence-research",
         "mental-health-crisis-support",
-        "physio-clinical-copilot"
+        "physio-clinical-copilot",
+        "presentation-studio"
       ],
       "topics": [
         "agent-skills",

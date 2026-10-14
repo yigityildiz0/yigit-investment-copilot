@@ -1,7 +1,7 @@
 {
   "yigit-investment-copilot": "Investment copilot: scans all BIST, TEFAS funds and US stocks by horizon; fundamental/technical/KAP/macro analysis, buy-sell-stop plans, portfolio risk. Hisse/fon: ne alayım, satayım mı. Never trades.",
   "physio-clinical-copilot": "Fizyo/physio; fizyoterapi/physiotherapy vakası, kırmızı bayrak, test/ölçek, egzersiz ve rehabilitasyon programı, hasta eğitimi, SOAP. Assess case; rehabilitation plan.",
-  "academic-study-coach": "Study coach: exam prep, flashcards, English papers/terms, NotebookLM, thesis talks, scholarly writing rules. Sınava hazırla, slaytı özetle, makaleyi çevir, tez sunumu.",
+  "academic-study-coach": "Study coach: exam prep, flashcards, English papers/terms, NotebookLM, thesis talk argument, scholarly writing rules. Sınava hazırla, slaytı özetle, makaleyi çevir, tez sunumu kurgusu.",
   "medical-evidence-research": "Literatür/literatur/literature tara; makale/paper değerlendir. PubMed/PEDro/Cochrane, klinik kanıt, tam metin, bias, GRADE ve güncel gelişmeler. Search literature; appraise paper.",
   "research-analyst": "Quick/deep research, evidence and sponsorship checks, timestamped video understanding, report synthesis. Araştır, derin araştır, doğru mu, videoyu anla. Existing host/local tools; no extra paid APIs.",
   "purchase-advisor": "Purchase and price-value advice incl. health products. Alayım mı, fiyatı iyi mi, almaya değer mi, muadili var mı, işe yarar mı, SGK karşılıyor mu.",
@@ -13,7 +13,7 @@
   "ai-image-video-studio": "AI image/video: ComfyUI workflows and fixes (FLUX, SDXL, Wan, LoRA), product photos, image edits, video QA. ComfyUI workflow yap, node eksik, görseli düzenle.",
   "coding-workflow": "Coding workflow: debugging, plans, architecture, code and security review, TDD, verification, git/PR. Hata ayıkla, bug çöz, kodu incele, test yaz, commit at, PR aç.",
   "ai-agent-builder": "AI tooling: write/merge/audit skills and plugins, package safety, MCP servers, ChatGPT apps, model choice, context budget. Skill yaz, MCP yap, hangi model daha iyi.",
-  "office-docs-qa": "Office file QA: Word, PDF, Excel, PPTX checks, file reading, diagrams, Markdown knowledge base. Word dosyası, PDF birleştir, Excel düzenle, akış şeması çiz.",
+  "office-docs-qa": "Office file QA: Word, PDF, Excel, reading PPTX files, diagrams, Markdown knowledge base. Word dosyası, PDF birleştir, Excel düzenle, akış şeması çiz. Decks: presentation-studio.",
   "data-analyst": "Data analysis: CSV/tables, statistics, data quality, SQL, metrics, dashboards, charts. Veriyi analiz et, SQL yaz, dashboard yap, grafik seç, KPI.",
   "ui-ux-pro-max": "UI/UX design intelligence: searchable styles, palettes, typography, charts, stack guidance and design-system generation. Renk paleti öner, font eşleştir, UI stili seç.",
   "ui-styling": "shadcn/ui + Tailwind styling, themes, dark mode, responsive layouts, canvas visuals. Tailwind/shadcn ile stil ver, tema ve renkler, dark mode, bileşen stili.",
@@ -21,7 +21,7 @@
   "brand": "Brand voice, visual identity, messaging, asset management, style guides, brand compliance. Marka kimliği, marka rehberi, ses tonu, görsel tutarlılık.",
   "banner-design": "Banners for social, ads, web heroes and print with multiple art directions. Banner tasarla, kapak görseli, reklam görseli, farklı boyutlara uyarla.",
   "design": "Design router: logo, icons, corporate identity, banners, HTML slides, social images, mockups. Logo tasarla, ikon, kurumsal kimlik, sosyal medya görseli.",
-  "slides": "Strategic HTML presentations with Chart.js, design tokens, responsive layouts, copywriting formulas. Sunum hazırla, slayt tasarla, HTML sunum, pitch deck.",
+  "html-slides": "HTML/web presentations with Chart.js, design tokens, responsive layouts. Only browser decks; PPTX goes to presentation-studio. HTML sunum, web sunumu, tarayıcı slaytı.",
   "caveman": "Terse caveman mode + companions. ONLY on explicit $caveman, /caveman, 'caveman mode', 'Caveman modunu aç'. Never for ordinary 'kısa yaz' or 'be concise'.",
   "primary-source-research": "Answer docs/API/spec questions from primary sources with citations; chat by default, memo if requested. Resmi dokümandan araştır, birincil kaynaktan doğrula.",
   "ai-research-skills": "AI/ML research library: training, RAG, evaluation, experiments, papers and plots. Complete source; cloud uploads cover every module across numbered parts. TR: AI araştır, model eğit, deney planla.",
@@ -33,5 +33,6 @@
   "site-seo-audit": "Technical/on-page SEO: metadata, schema, canonical, sitemap, robots, links, Core Web Vitals; evidence and priorities. SEO denetle, site haritası, meta etiket.",
   "campaign-plan": "Marketing campaign: goal, audience, positioning, channels, content calendar, budget, KPIs. Kampanya planla, pazarlama planı, tanıtım stratejisi, içerik takvimi.",
   "parallel-web": "Parallel service reference preserved. This no-extra-cost profile routes research to existing host tools, not billed Parallel APIs. Parallel dokümanı; ücretsiz araştırma alternatifi.",
+  "presentation-studio": "Editable PPTX decks end to end: rules, plan, real images, design kit, speaker notes with pronunciations, render QA, audit, PDF and reading guide. Sunum hazırla, slayt, PowerPoint, konuşmacı notu.",
   "super-memory": "Project-local memory, compact checkpoints and cross-agent handoffs. Resume, continue, context full; devam et, proje hafızası, ajan devri."
 }

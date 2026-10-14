@@ -1,30 +1,47 @@
 """Public documentation templates. No private environment data."""
 INSTALL='''# Installation / Kurulum
 
-[Library](../README.md) · [Downloads](../DOWNLOADS.md)
+[Library](../README.md) · [Downloads](../DOWNLOADS.md) · [Türkçe](#türkçe)
 
-## English
+Pick one skill (or a collection) and install ONE copy per app. Files on disk do not prove activation:
+after installing, ask the app something the skill should handle and check that it loads.
 
-1. Pick a maintained skill and read its purpose, trigger and dependencies.
-2. Choose the artifact for the environment you actually use:
-   - **Claude Code:** place the complete selected skill directory in the supported personal/project skill directory. Keep resources beside SKILL.md. Extraction does not change user settings.
-   - **Codex:** use the local-folder edition in the supported skills directory; use a plugin bundle only when the host supports its manifest.
-   - **DeepSeek Harness:** select the directory through your configured filesystem skill provider. Verify it appears and loads in the catalog. A file on disk is not proof of invocation.
-   - **Claude web:** unpack the collection and import individual root/support ZIPs through the account’s supported skill flow. The outer collection is not one skill.
-   - **ChatGPT web / GPT Knowledge:** do not assume a ZIP installs executable skills or MCP tools. Knowledge uploads are documents. Use a skill/plugin import only if the actual account offers it; otherwise use instructions as reference and disclose missing capabilities.
-3. Test one example request. Instructions do not supply an API key, browser session, model, GPU, Office runtime or subscription.
-4. Update from the same canonical source; keep one active copy per skill and preserve user edits. Domain collections overlap intentionally.
+| App | Artifact | Steps |
+|---|---|---|
+| **Claude Code** (CLI / desktop) | `downloads/portable-skills.zip` | Unzip; copy each skill folder to `~/.claude/skills/<name>/` (personal) or `.claude/skills/<name>/` (project). Restart the session; the skill list shows it. |
+| **Claude.ai** (web, desktop app) | `packages/claude/<name>.zip` (or every `-part-NNN` of a split skill) | Settings → Capabilities → Skills → Upload skill; upload each ZIP separately and enable it. The outer `downloads/Claude.zip` is a collection, not one skill. |
+| **Codex** (ChatGPT desktop / CLI) | `downloads/Codex.zip` | Unzip into `~/.codex/skills/` (or `~/.agents/skills/`). Too many enabled plugins can truncate the skill list; check it in a new thread. |
+| **ChatGPT** (web, with plugins/skills) | `packages/chatgpt/<name>.zip` or `downloads/ChatGPT.zip` | Use the account's plugin/skill import if offered. A Knowledge upload is only documents; it installs nothing. |
+| **Gemini CLI** | `downloads/portable-skills.zip` | Copy each folder to `~/.gemini/skills/<name>/` (or `.gemini/skills/` in a project); run `/skills list`. |
+| **Gemini app** (web Skills) | `packages/gemini/<name>.zip` | Unzip and upload the folder in Skills. Only md/txt/py/sh/json/yaml/csv/pdf/images are accepted; other files are listed in `GEMINI-UNSUPPORTED-FILES.md`. Availability rolls out per account. |
+| **OpenCode** | `downloads/portable-skills.zip` | Unzip next to your config and add `"skills": ["./skills"]` to the OpenCode config. |
+| **DeepSeek Harness** | `downloads/portable-skills.zip` | Point the filesystem skill provider (agentsHome) at the extracted folder; verify the catalog lists the skill. |
 
-This edition uses existing host tools, open sources and local computation without an automatic extra billed service. Your existing model/host plan still has its own usage costs. Host capabilities and file limits change; verify current documentation instead of treating these files as account entitlement.
+Commands (Windows PowerShell, Claude Code example):
+
+```powershell
+Expand-Archive portable-skills.zip -DestinationPath "$env:TEMP/skills"
+Copy-Item "$env:TEMP/skills/presentation-studio" "$HOME/.claude/skills/" -Recurse
+```
+
+Instructions supply no API key, browser session, model, GPU, Office runtime or subscription. This
+edition uses existing host tools, open sources and local computation without an automatic extra billed
+service. Update from the same canonical source; keep one active copy per skill.
 
 ## Türkçe
 
-1. Güncel katalogdan skill seç; amaç, tetikleme ve bağımlılıkları oku.
-2. Claude Code/Codex için tam klasörü desteklenen yerel skill dizinine koy. Harness’ta mevcut dosya sistemi sağlayıcısıyla seç ve katalogdan yüklenmesini doğrula.
-3. Claude web dış ZIPini aç; kök/destek parça ZIPlerini hesabın desteklediği akışla ayrı yükle. Dış ZIP tek skill değildir.
-4. ChatGPT/GPT Knowledge’a ZIP yüklemek çalıştırılabilir skill veya MCP kurmaz. Yalnız hesabın gerçekten sunduğu mekanizmayı kullan; yoksa talimatlar bir referanstır.
-5. Bir örnek istekle dene. Dosyanın bulunması, aracın çalışması veya klinik/finansal etkinlik kanıtı değildir. API, GPU, Office veya abonelik paketle gelmez.
-6. Aynı kaynaktan güncelle; çift etkin kopya oluşturma. Mevcut model/host kullanımının kendi maliyeti ayrıdır; ek ücretli servis otomatik seçilmez.
+Her uygulamaya bir skill'in tek kopyasını kur; kurduktan sonra skill'in işine giren bir istekle dene.
+
+- **Claude Code:** `portable-skills.zip` içindeki klasörü `~/.claude/skills/<ad>/` altına kopyala.
+- **Claude.ai:** Ayarlar → Capabilities → Skills → `packages/claude/<ad>.zip` dosyalarını tek tek yükle ve aç (parçalı skill'de bütün parçalar).
+- **Codex:** `Codex.zip` içeriğini `~/.codex/skills/` altına aç; yeni sohbette skill listesini kontrol et (çok eklenti listeyi kesebilir).
+- **ChatGPT web:** Hesapta eklenti/skill içe aktarma varsa `packages/chatgpt/<ad>.zip`; Knowledge yüklemesi kurulum değildir.
+- **Gemini CLI:** klasörleri `~/.gemini/skills/` altına kopyala, `/skills list` ile doğrula.
+- **Gemini web:** `packages/gemini/<ad>.zip` dosyasını aç, klasörü Skills bölümüne yükle; desteklenmeyen dosyalar pakette listelenir.
+- **OpenCode:** `"skills": ["./skills"]` ayarıyla klasörü göster.
+- **DeepSeek Harness:** dosya sistemi skill sağlayıcısını (agentsHome) klasöre yönelt, katalogda göründüğünü doğrula.
+
+Paket API, GPU, Office veya abonelik getirmez; ek ücretli servis otomatik seçilmez.
 '''
 MAINTAINING='''# One source, durable collections / Tek kaynak, kalıcı koleksiyonlar
 
@@ -48,9 +65,9 @@ LEGACY='''# Maintained vs historical / Güncel ve tarihsel kapsam
 
 The maintained set is declared in current-release.json, not inferred from every old file. Earlier catalogs, documents and assets remain for traceability; their former counts are not a current maintenance or runtime-test claim. Repository names and Git history are preserved.
 
-Use README and DOWNLOADS for the current edition. Old tags/downloads may contain former provider integrations, larger catalogs or different host assumptions. Gemini Deep Research is not in the maintained edition. No extra billed API fallback is enabled by this edition.
+Use README and DOWNLOADS for the current edition. Old tags/downloads may contain former provider integrations, larger catalogs or different host assumptions. Gemini Deep Research is not in the maintained edition; the former `slides` skill is now `html-slides` (browser decks only) and editable PowerPoint work moved to `presentation-studio`. No extra billed API fallback is enabled by this edition.
 
-Türkçe: Güncel kapsam current-release.json ile tanımlanır. Eski katalog ve kaynaklar izlenebilirlik için korunur; eski sayı ve test iddiaları güncel kapsam değildir. Güncel README/indirmeleri kullan. Eski sürümler farklı sağlayıcı/host varsayımları içerebilir. Gemini Deep Research güncel sürümde yoktur.
+Türkçe: Güncel kapsam current-release.json ile tanımlanır. Eski katalog ve kaynaklar izlenebilirlik için korunur; eski sayı ve test iddiaları güncel kapsam değildir. Güncel README/indirmeleri kullan. Eski sürümler farklı sağlayıcı/host varsayımları içerebilir. Gemini Deep Research güncel sürümde yoktur; eski `slides` artık `html-slides` (yalnız tarayıcı sunumu), PowerPoint işleri `presentation-studio`'da.
 '''
 LICENSE_SCOPE='''# License scope and provenance / Lisans kapsamı
 

@@ -61,11 +61,35 @@ def skill_page(s, source, lang):
     else: out+=('Bağımsız kök akışı; referanslar giriş dosyasında listelenir.\n' if tr else 'Standalone root workflow; references are linked by the entry point.\n')
     return out
 
-def readme(reg, selected, title, summary, lang='en'):
+PLATFORMS=[('Claude Code','portable folder → ~/.claude/skills','taşınabilir klasör → ~/.claude/skills'),
+           ('Claude.ai','one upload ZIP per skill','skill başına bir yükleme ZIP\'i'),
+           ('Codex / ChatGPT desktop','Codex.zip → ~/.codex/skills','Codex.zip → ~/.codex/skills'),
+           ('ChatGPT web','plugin ZIP where the account offers import','hesap içe aktarma sunuyorsa eklenti ZIP\'i'),
+           ('Gemini CLI / app','~/.gemini/skills · Skills upload (filtered copy)','~/.gemini/skills · Skills yükleme (filtreli kopya)'),
+           ('OpenCode · DeepSeek Harness','portable folder + skills path','taşınabilir klasör + skills yolu')]
+
+def readme(reg, selected, title, summary, lang='en', repo=None):
     tr=lang=='tr'
-    result=picture(title)+f'\n# {title}\n\n[English](README.md) · [Türkçe](README.tr.md)\n\n**{summary}**\n\n'
-    result+=(f'{len(selected)} bakımı sürdürülen giriş noktası. Göreve göre birini seç; tüm kütüphaneyi bağlama yükleme.\n\n' if tr else f'{len(selected)} maintained entry points. Choose one for the job; do not load the entire library into context.\n\n')
+    owner=reg.get('owner','yigityildiz0')
+    result=picture(title)+f'\n# {title}\n\n[English](README.md) · [Türkçe](README.tr.md)\n\n'
+    badges=[f'![Edition](https://img.shields.io/badge/edition-{reg["release"].replace("-","--")}-0f6e8c)',
+            f'![Skills](https://img.shields.io/badge/{"skill" if tr else "skills"}-{len(selected)}-b0303f)',
+            '![Languages](https://img.shields.io/badge/EN%20%2B%20TR-guides-e0a43a)']
+    if repo:
+        badges.insert(1,f'[![Validate](https://github.com/{owner}/{repo}/actions/workflows/validate.yml/badge.svg)](https://github.com/{owner}/{repo}/actions/workflows/validate.yml)')
+        badges.insert(2,f'[![Release](https://img.shields.io/github/v/release/{owner}/{repo}?display_name=tag&sort=date)](https://github.com/{owner}/{repo}/releases/latest)')
+    result+=' '.join(badges)+f'\n\n**{summary}**\n\n'
+    n=len(selected)
+    result+=(f'{n} bakımı sürdürülen giriş noktası. Göreve göre birini seç; tüm kütüphaneyi bağlama yükleme.\n\n' if tr else f'{n} maintained entry point{"" if n==1 else "s"}. Choose one for the job; do not load the entire library into context.\n\n')
     result+=f'[{"Başla" if tr else "Start here"}](docs/INSTALL.md) · [{"Katalog" if tr else "Browse the catalog"}](https://yigityildiz0.github.io/universal-ai-skill-library/) · [{"İndirmeler" if tr else "Downloads"}](DOWNLOADS.md) · [{"Bakım modeli" if tr else "Maintenance model"}](MAINTAINING.md)\n\n'
+    notes=(reg.get('release_notes') or {}).get(lang) or []
+    ids={s['id'] for s in selected}
+    notes=[x['text'] for x in notes if not x.get('skills') or set(x['skills'])&ids]
+    if notes:
+        result+=(f'## Bu sürümde yeni ({reg["release"]})\n\n' if tr else f'## New in {reg["release"]}\n\n')+''.join(f'- {x}\n' for x in notes)+'\n'
+    result+=('## Hangi uygulamada?\n\n| Uygulama | Paket |\n|---|---|\n' if tr else '## Works with\n\n| App | Package |\n|---|---|\n')
+    result+=''.join(f'| {a} | {(t if tr else e)} |\n' for a,e,t in PLATFORMS)
+    result+=('\nAyrıntılı adımlar: [Kurulum](docs/INSTALL.md). Dosyanın diskte olması etkin olduğunu kanıtlamaz; bir örnek istekle dene.\n\n' if tr else '\nStep-by-step: [Installation](docs/INSTALL.md). A file on disk is not proof of activation; test with one example request.\n\n')
     result+=('## Yapmak istediğin işi seç\n\n' if tr else '## Start with the work you want to do\n\n')
     for cat in ORDER:
         rows=[s for s in selected if s['category']==cat]

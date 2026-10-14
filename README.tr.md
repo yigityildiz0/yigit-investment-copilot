@@ -7,11 +7,30 @@
 
 [English](README.md) · [Türkçe](README.tr.md)
 
+![Edition](https://img.shields.io/badge/edition-2026.10.14-0f6e8c) [![Validate](https://github.com/yigityildiz0/yigit-investment-copilot/actions/workflows/validate.yml/badge.svg)](https://github.com/yigityildiz0/yigit-investment-copilot/actions/workflows/validate.yml) [![Release](https://img.shields.io/github/v/release/yigityildiz0/yigit-investment-copilot?display_name=tag&sort=date)](https://github.com/yigityildiz0/yigit-investment-copilot/releases/latest) ![Skills](https://img.shields.io/badge/skill-1-b0303f) ![Languages](https://img.shields.io/badge/EN%20%2B%20TR-guides-e0a43a)
+
 **Piyasa kanıtları, senaryolar, portföy riski ve karar planları için yatırım araştırması iş akışları.**
 
 1 bakımı sürdürülen giriş noktası. Göreve göre birini seç; tüm kütüphaneyi bağlama yükleme.
 
 [Başla](docs/INSTALL.md) · [Katalog](https://yigityildiz0.github.io/universal-ai-skill-library/) · [İndirmeler](DOWNLOADS.md) · [Bakım modeli](MAINTAINING.md)
+
+## Bu sürümde yeni (2026.10.14)
+
+- Gemini paketleri (CLI klasörleri ve filtreli Gemini uygulaması yüklemeleri), her uygulama için kurulum tablosu ve SHA-256 özetli gerçek GitHub Release.
+
+## Hangi uygulamada?
+
+| Uygulama | Paket |
+|---|---|
+| Claude Code | taşınabilir klasör → ~/.claude/skills |
+| Claude.ai | skill başına bir yükleme ZIP'i |
+| Codex / ChatGPT desktop | Codex.zip → ~/.codex/skills |
+| ChatGPT web | hesap içe aktarma sunuyorsa eklenti ZIP'i |
+| Gemini CLI / app | ~/.gemini/skills · Skills yükleme (filtreli kopya) |
+| OpenCode · DeepSeek Harness | taşınabilir klasör + skills yolu |
+
+Ayrıntılı adımlar: [Kurulum](docs/INSTALL.md). Dosyanın diskte olması etkin olduğunu kanıtlamaz; bir örnek istekle dene.
 
 ## Yapmak istediğin işi seç
 
@@ -51,4 +70,4 @@ Ana kaynak [Universal AI Skill Library](https://github.com/yigityildiz0/universa
 - Kaynak lisansları korunur; bütün üçüncü taraf içeriğine tek lisans varsayılmaz.
 
 ---
-Maintained by [Yigit Yildiz](https://github.com/yigityildiz0) · Source edition 2026.10.11
+Maintained by [Yigit Yildiz](https://github.com/yigityildiz0) · Source edition 2026.10.14

@@ -18,7 +18,26 @@ DOCS = {
     "claude_plugin": "https://code.claude.com/docs/en/plugins/manifest-reference",
     "openai_plugin": "https://developers.openai.com/plugins/build/plugins",
     "agent_schema": PLUGIN_SCHEMA,
+    "gemini_cli_skills": "https://geminicli.com/docs/cli/creating-skills/",
 }
+# Gemini app (web) Skills accept SKILL.md folders with these reference file types (≤100 MB total).
+GEMINI_WEB_EXT = {".md", ".txt", ".py", ".sh", ".json", ".yaml", ".yml", ".csv", ".pdf", ".jpg", ".jpeg", ".png"}
+
+
+def gemini_web_payload(name, mapping):
+    """Gemini app upload copy: supported file types only; the rest is listed, never silently lost."""
+    keep, dropped = {}, []
+    for rel, data in sorted(mapping.items()):
+        if Path(rel).suffix.lower() in GEMINI_WEB_EXT or rel.endswith("LICENSE") or Path(rel).name.upper().startswith(("LICENSE", "NOTICE")):
+            keep[rel if Path(rel).suffix else rel + ".txt"] = data
+        else:
+            dropped.append(rel)
+    if dropped:
+        keep["GEMINI-UNSUPPORTED-FILES.md"] = ("# Files not included in the Gemini app copy\n\n"
+            "The Gemini app accepts text, code (.py/.sh), data and document/image files only. These files exist in the "
+            "complete source (Gemini/gemini-cli-skills.zip or the full-source ZIP) and must be run locally when needed:\n\n"
+            + "".join(f"- {r}\n" for r in dropped)).encode("utf-8")
+    return keep
 
 
 def files(root):
@@ -246,6 +265,25 @@ def build_desktop_mapping(gpt, claude, opencode, release):
         "contains the complete unsplit source. Choose local or account copies to avoid duplicate activation.\n\n"
         + DOCS["claude_upload"] + "\n" + DOCS["claude_plugin"] + "\n").encode("utf-8")
     result["OpenCode/README.md"] = common.encode("utf-8") + portable["README.md"]
+    # Gemini: CLI (Agent Skills folders) + app (web) per-skill upload copies.
+    result["Gemini/gemini-cli-skills.zip"] = z({"skills/" + rel: data for rel, data in flatten(gpt).items()})
+    for name, fs in sorted(gpt.items()):
+        result[f"Gemini/skills/{name}.zip"] = z({name + "/" + rel: b for rel, b in gemini_web_payload(name, fs).items()})
+    result["Gemini/README.md"] = (common + "\n## Gemini\n\n"
+        "**Gemini CLI:** unzip gemini-cli-skills.zip and copy each folder under skills/ to ~/.gemini/skills/ "
+        "(user scope) or <project>/.gemini/skills/ (workspace scope); check with /skills list. Install one copy only.\n\n"
+        "**Gemini app (web, Skills):** unzip a file from skills/ and upload the extracted folder (SKILL.md at its root) "
+        "in the Skills section. The app accepts md/txt/py/sh/json/yaml/csv/pdf/jpg/png files up to 100 MB in total; "
+        "files of other types are listed in GEMINI-UNSUPPORTED-FILES.md inside that skill and stay available in the "
+        "CLI/full-source ZIP. Skills availability in the Gemini app rolls out per account; verify it in your account.\n\n"
+        + DOCS["gemini_cli_skills"] + "\n").encode("utf-8")
+    # DeepSeek Harness reads the canonical master directly (profile agentsHome); the ZIP is for other machines.
+    result["DeepSeek-Harness/yigit-skills-portable.zip"] = z({"skills/" + rel: data for rel, data in flatten(gpt).items()})
+    result["DeepSeek-Harness/README.md"] = (common + "\n## DeepSeek Harness\n\n"
+        "On this computer DeepSeek Harness reads the canonical master folder directly through its skill-filesystem "
+        "agentsHome setting, so no copy is needed and none should be installed next to it (duplicates confuse routing). "
+        "Use yigit-skills-portable.zip only on another machine: extract it and point the harness skill folder at skills/. "
+        "If the model does not see a skill catalog, ask it to read the SKILL.md of the needed skill by path.\n").encode("utf-8")
     result["build-manifest.json"] = json_bytes({"format": 1, "release": release, "counts": counts,
         "documentation": DOCS, "files": {k: digest(v) for k, v in sorted(result.items())}})
     return result
