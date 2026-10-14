@@ -210,82 +210,36 @@ def cloud_parts(name, mapping, limit=200):
 
 
 def build_desktop_mapping(gpt, claude, opencode, release):
+    """Simple Desktop layout: one folder per app, a `skills/` folder inside it, one ZIP per skill.
+
+    No splitting into parts, no plugin/full-source/README/manifest extras. Claude additionally gets
+    `toplu-yukleme/` with a few group ZIPs (about 20 skill folders each) for bulk drag-and-drop.
+    """
     if set(gpt) != set(claude) or set(gpt) != set(opencode):
         raise ValueError("Provider skill sets differ; package all canonical skills")
-    result, coverage = {}, {}
+    result = {}
     z = lambda m: zip_bytes(m, release["date"])
-    result["ChatGPT/yigit-skills-plugin.zip"] = z(plugin_files(gpt, release))
-    result["ChatGPT/yigit-skills-full-source.zip"] = z({"skills/" + k: v for k, v in flatten(gpt).items()})
-    medical = {n: gpt[n] for n in ("medical-evidence-research", "physio-clinical-copilot") if n in gpt}
-    if medical:
-        result["ChatGPT/medical-literature-plugin.zip"] = z(plugin_files(medical, release, "medical-literature"))
-    result["Claude/yigit-skills-claude-code.zip"] = z(plugin_files(claude, release, provider="claude"))
-    result["Claude/yigit-skills-full-source.zip"] = z({"skills/" + k: v for k, v in flatten(claude).items()})
-    for name, fs in sorted(claude.items()):
-        parts, record = cloud_parts(name, fs)
-        coverage[name] = record
-        for part, payload in parts.items():
-            data = z({part + "/" + rel: b for rel, b in payload.items()})
-            validate_zip(data, skill=part, limit=200)
-            result[f"Claude/skills/{part}.zip"] = data
-    config = {"$schema": "https://opencode.ai/config.json", "skills": ["./skills"]}
-    portable = {"skills/" + rel: data for rel, data in flatten(opencode).items()}
-    portable["opencode.skills.json"] = json_bytes(config)
-    portable["README.md"] = ("# OpenCode portable skills\n\n"
-        "Keep this directory together. Merge the skills array in opencode.skills.json into the "
-        "appropriate OpenCode v2 config, resolving ./skills relative to that config's directory. "
-        "If copying the snippet elsewhere, adjust the relative path. Select this complete generated source "
-        "instead of duplicate installed copies. This bundle does not enable tools, MCP servers or accounts.\n").encode("utf-8")
-    result["OpenCode/yigit-skills-portable.zip"] = z(portable)
-    result["OpenCode/opencode.skills.json"] = json_bytes(config)
-    result["Claude/coverage-manifest.json"] = json_bytes(coverage)
-    counts = {"canonical_skills": len(gpt), "claude_upload_zips": sum(len(r["parts"]) for r in coverage.values()),
-              "claude_max_files_per_zip": 200}
-    common = ("# Complete generated skill packages\n\n"
-        "Edit only the canonical master or generators; never hand-edit generated/installed copies. "
-        "Full source is included for every host. Local sync does not upload, install or enable a cloud-account skill. "
-        "Account features and supported import flows vary; verify installation and enabled state in that account.\n\n"
-        "Personal paths in preserved upstream examples must be resolved to the current environment. "
-        "UI/desktop/browser tools, secrets, network and paid services are conditional capabilities; this package grants none.\n")
-    result["ChatGPT/README.md"] = (common + "\n## ChatGPT / Codex\n\n"
-        "yigit-skills-plugin.zip contains the full plugin (root plugin.json with Agent Plugins schema, "
-        "legacy .codex-plugin fallback, complete skills). Use the supported plugin import/creator flow in your account. "
-        "The full-source ZIP is also available for inspection/local installation. The medical plugin is an optional "
-        "two-skill alternative; do not enable it alongside the same skills in the full plugin.\n\n"
-        + DOCS["openai_plugin"] + "\n").encode("utf-8")
-    result["Claude/README.md"] = (common + "\n## Claude uploads\n\n"
-        "Upload each ZIP in skills/ separately through the supported custom-skill uploader. Each has exactly "
-        "one skill folder with SKILL.md at its root, at most 200 files and a description at most 200 characters. "
-        "200 characters is the documented Claude.ai uploader contract; Claude Code/API documentation permits longer "
-        "descriptions. The conservative 200-file cap is an uploader constraint, not a limit on the full source. "
-        "Oversized modular libraries are deterministically split at module boundaries; upload EVERY numbered part. "
-        "coverage-manifest.json accounts for every source file/hash and module. A part advertises only its actual "
-        "contents. For cross-part dependencies follow CLOUD-README.md.\n\n"
-        "yigit-skills-claude-code.zip is the complete local Claude Code plugin; yigit-skills-full-source.zip "
-        "contains the complete unsplit source. Choose local or account copies to avoid duplicate activation.\n\n"
-        + DOCS["claude_upload"] + "\n" + DOCS["claude_plugin"] + "\n").encode("utf-8")
-    result["OpenCode/README.md"] = common.encode("utf-8") + portable["README.md"]
-    # Gemini: CLI (Agent Skills folders) + app (web) per-skill upload copies.
-    result["Gemini/gemini-cli-skills.zip"] = z({"skills/" + rel: data for rel, data in flatten(gpt).items()})
-    for name, fs in sorted(gpt.items()):
-        result[f"Gemini/skills/{name}.zip"] = z({name + "/" + rel: b for rel, b in gemini_web_payload(name, fs).items()})
-    result["Gemini/README.md"] = (common + "\n## Gemini\n\n"
-        "**Gemini CLI:** unzip gemini-cli-skills.zip and copy each folder under skills/ to ~/.gemini/skills/ "
-        "(user scope) or <project>/.gemini/skills/ (workspace scope); check with /skills list. Install one copy only.\n\n"
-        "**Gemini app (web, Skills):** unzip a file from skills/ and upload the extracted folder (SKILL.md at its root) "
-        "in the Skills section. The app accepts md/txt/py/sh/json/yaml/csv/pdf/jpg/png files up to 100 MB in total; "
-        "files of other types are listed in GEMINI-UNSUPPORTED-FILES.md inside that skill and stay available in the "
-        "CLI/full-source ZIP. Skills availability in the Gemini app rolls out per account; verify it in your account.\n\n"
-        + DOCS["gemini_cli_skills"] + "\n").encode("utf-8")
-    # DeepSeek Harness reads the canonical master directly (profile agentsHome); the ZIP is for other machines.
-    result["DeepSeek-Harness/yigit-skills-portable.zip"] = z({"skills/" + rel: data for rel, data in flatten(gpt).items()})
-    result["DeepSeek-Harness/README.md"] = (common + "\n## DeepSeek Harness\n\n"
-        "On this computer DeepSeek Harness reads the canonical master folder directly through its skill-filesystem "
-        "agentsHome setting, so no copy is needed and none should be installed next to it (duplicates confuse routing). "
-        "Use yigit-skills-portable.zip only on another machine: extract it and point the harness skill folder at skills/. "
-        "If the model does not see a skill catalog, ask it to read the SKILL.md of the needed skill by path.\n").encode("utf-8")
-    result["build-manifest.json"] = json_bytes({"format": 1, "release": release, "counts": counts,
-        "documentation": DOCS, "files": {k: digest(v) for k, v in sorted(result.items())}})
+    def one(name, files):
+        if "SKILL.md" not in files:
+            raise ValueError(f"{name}: SKILL.md missing")
+        return z({name + "/" + rel: data for rel, data in sorted(files.items())})
+    for name in sorted(claude):
+        result[f"Claude/skills/{name}.zip"] = one(name, claude[name])
+    for name in sorted(gpt):
+        result[f"ChatGPT/skills/{name}.zip"] = one(name, gpt[name])
+        result[f"Gemini/skills/{name}.zip"] = one(name, gemini_web_payload(name, gpt[name]))
+    for name in sorted(opencode):
+        result[f"OpenCode/skills/{name}.zip"] = one(name, opencode[name])
+        result[f"DeepSeek-Harness/skills/{name}.zip"] = one(name, gpt[name])
+    names = sorted(claude)
+    groups = max(1, -(-len(names) // 20))
+    size = -(-len(names) // groups)
+    for i in range(groups):
+        chunk = names[i * size:(i + 1) * size]
+        mapping = {}
+        for name in chunk:
+            mapping.update({name + "/" + rel: data for rel, data in claude[name].items()})
+        result[f"Claude/toplu-yukleme/grup-{i + 1}-({len(chunk)}-skill).zip"] = z(mapping)
     return result
 
 

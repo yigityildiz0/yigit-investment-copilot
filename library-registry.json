@@ -2,7 +2,7 @@
   "schema_version": 1,
   "owner": "yigityildiz0",
   "canonical_repository": "universal-ai-skill-library",
-  "release": "2026.10.14",
+  "release": "2026.10.14.2",
   "skills": [
     {
       "id": "academic-study-coach",
@@ -299,6 +299,20 @@
       }
     },
     {
+      "id": "pdf-studio",
+      "category": "Learn & write",
+      "en": {
+        "purpose": "Make reliable PDFs: intake questions first, print-safe HTML/CSS with design languages, rendered pages audited for split tables, stranded headings, overflow and broken letters.",
+        "prompt": "Make an A4 portrait PDF study guide from these notes, clean clinical design, with references.",
+        "flow": "Ask orientation, purpose, design language and sources; build from the print kit; lint the HTML; render with Edge/Chrome; audit and read every page; deliver with checks listed."
+      },
+      "tr": {
+        "purpose": "Güvenilir PDF hazırlar: önce sorular, baskıya uygun HTML/CSS ve tasarım dilleri, sayfa sayfa denetim: bölünen tablo, yalnız kalan başlık, taşma ve bozuk harf.",
+        "prompt": "Bu notlardan A4 dikey, temiz klinik tasarımlı, kaynakçalı bir PDF çalışma kılavuzu hazırla.",
+        "flow": "Yön, amaç, tasarım dili ve kaynakları sorar; baskı kitiyle kurar; HTML'yi denetler; Edge/Chrome ile çıkarır; sayfaları okuyup denetler; kontrolleri listeleyerek teslim eder."
+      }
+    },
+    {
       "id": "personal-tech-copilot",
       "category": "Everyday workflows",
       "en": {
@@ -535,6 +549,12 @@
         ]
       },
       {
+        "text": "**pdf-studio** (new): reliable PDFs — intake questions, design languages, print-safe pagination (no split tables, stranded headings or overflow), lint + page audit, research-backed list of AI PDF failure modes.",
+        "skills": [
+          "pdf-studio"
+        ]
+      },
+      {
         "text": "`slides` is renamed **html-slides** and only handles browser decks; PowerPoint requests route to presentation-studio.",
         "skills": [
           "html-slides",
@@ -552,6 +572,9 @@
       },
       {
         "text": "Gemini packages (CLI folders and filtered Gemini app uploads), an installation table for every app and a real GitHub Release with SHA-256 checksums."
+      },
+      {
+        "text": "One ZIP per skill for every app, never split into parts; Claude gets grouped bulk-upload ZIPs on the Desktop edition."
       }
     ],
     "tr": [
@@ -559,6 +582,12 @@
         "text": "**presentation-studio** (yeni): düzenlenebilir PowerPoint sunumu baştan sona — hoca kuralları varsayılan, slayt planı, lisanslı gerçek fotoğraflar, JS ve Python tasarım kitleri, süreli ve okunuşlu konuşmacı notları, PowerPoint render kontrolü, `pptx_audit.py` ve sunum öncesi okuma kılavuzu.",
         "skills": [
           "presentation-studio"
+        ]
+      },
+      {
+        "text": "**pdf-studio** (yeni): güvenilir PDF — önce sorular, tasarım dilleri, baskıya uygun sayfalama (bölünen tablo, yalnız kalan başlık ve taşma yok), denetim ve yapay zekâ PDF hatalarının araştırılmış listesi.",
+        "skills": [
+          "pdf-studio"
         ]
       },
       {
@@ -579,6 +608,9 @@
       },
       {
         "text": "Gemini paketleri (CLI klasörleri ve filtreli Gemini uygulaması yüklemeleri), her uygulama için kurulum tablosu ve SHA-256 özetli gerçek GitHub Release."
+      },
+      {
+        "text": "Her uygulama için skill başına tek ZIP, parçalara bölünmez; masaüstü sürümünde Claude için toplu yükleme grupları var."
       }
     ]
   },
@@ -632,6 +664,7 @@
         "design-system",
         "html-slides",
         "office-docs-qa",
+        "pdf-studio",
         "presentation-studio",
         "site-seo-audit",
         "ui-styling",
@@ -658,6 +691,7 @@
         "medical-evidence-research",
         "office-docs-qa",
         "parallel-web",
+        "pdf-studio",
         "presentation-studio",
         "primary-source-research",
         "purchase-advisor",

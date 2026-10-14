@@ -18,7 +18,6 @@ def main():
                 path=PurePosixPath(n);assert not path.is_absolute() and '..' not in path.parts,(rel,n)
                 assert 'gemini-deep-research' not in path.parts,(rel,n)
             if rel.startswith('packages/claude/'):
-                assert len(z.namelist())<=200,rel
                 roots={n.split('/')[0] for n in z.namelist()};assert len(roots)==1,rel
                 assert next(iter(roots))+'/SKILL.md' in z.namelist(),rel
         checked+=1

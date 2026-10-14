@@ -8,7 +8,7 @@ after installing, ask the app something the skill should handle and check that i
 | App | Artifact | Steps |
 |---|---|---|
 | **Claude Code** (CLI / desktop) | `downloads/portable-skills.zip` | Unzip; copy each skill folder to `~/.claude/skills/<name>/` (personal) or `.claude/skills/<name>/` (project). Restart the session; the skill list shows it. |
-| **Claude.ai** (web, desktop app) | `packages/claude/<name>.zip` (or every `-part-NNN` of a split skill) | Settings → Capabilities → Skills → Upload skill; upload each ZIP separately and enable it. The outer `downloads/Claude.zip` is a collection, not one skill. |
+| **Claude.ai** (web, desktop app) | `packages/claude/<name>.zip` (one ZIP per skill, never split) | Settings → Capabilities → Skills → Upload skill; upload each ZIP separately and enable it. The outer `downloads/Claude.zip` is a collection of per-skill ZIPs, not one skill; unzip it and upload the inner ZIPs. |
 | **Codex** (ChatGPT desktop / CLI) | `downloads/Codex.zip` | Unzip into `~/.codex/skills/` (or `~/.agents/skills/`). Too many enabled plugins can truncate the skill list; check it in a new thread. |
 | **ChatGPT** (web, with plugins/skills) | `packages/chatgpt/<name>.zip` or `downloads/ChatGPT.zip` | Use the account's plugin/skill import if offered. A Knowledge upload is only documents; it installs nothing. |
 | **Gemini CLI** | `downloads/portable-skills.zip` | Copy each folder to `~/.gemini/skills/<name>/` (or `.gemini/skills/` in a project); run `/skills list`. |
@@ -32,7 +32,7 @@ service. Update from the same canonical source; keep one active copy per skill.
 Her uygulamaya bir skill'in tek kopyasını kur; kurduktan sonra skill'in işine giren bir istekle dene.
 
 - **Claude Code:** `portable-skills.zip` içindeki klasörü `~/.claude/skills/<ad>/` altına kopyala.
-- **Claude.ai:** Ayarlar → Capabilities → Skills → `packages/claude/<ad>.zip` dosyalarını tek tek yükle ve aç (parçalı skill'de bütün parçalar).
+- **Claude.ai:** Ayarlar → Capabilities → Skills → `packages/claude/<ad>.zip` dosyalarını tek tek yükle ve aç .
 - **Codex:** `Codex.zip` içeriğini `~/.codex/skills/` altına aç; yeni sohbette skill listesini kontrol et (çok eklenti listeyi kesebilir).
 - **ChatGPT web:** Hesapta eklenti/skill içe aktarma varsa `packages/chatgpt/<ad>.zip`; Knowledge yüklemesi kurulum değildir.
 - **Gemini CLI:** klasörleri `~/.gemini/skills/` altına kopyala, `/skills list` ile doğrula.
