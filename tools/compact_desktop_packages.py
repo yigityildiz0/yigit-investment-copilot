@@ -209,6 +209,40 @@ def cloud_parts(name, mapping, limit=200):
                    "modules": module_parts, "files": coverage}
 
 
+def fit_claude_upload(name, files, release_date="2026-01-01", reserve=190):
+    """Claude.ai rejects an uploaded skill ZIP with more than 200 files and treats two ZIPs as two skills.
+
+    For a skill above `reserve` files, keep the entry point, licences, yigit/ notes and every MODULE.md as
+    loose files and pack all other supporting files into ONE `resources.zip` inside the same skill, with the
+    same relative paths. SKILL.md gets a note telling the model how to read them. Smaller skills are unchanged.
+    """
+    if len(files) <= reserve:
+        return files
+    keep, moved = {}, {}
+    for rel, data in files.items():
+        top = rel.split("/")[0]
+        base = rel.rsplit("/", 1)[-1].upper()
+        loose = (rel == "SKILL.md" or base.startswith(("LICENSE", "NOTICE", "COPYING")) or rel.endswith("/MODULE.md")
+                 or (top == "yigit" and rel.count("/") == 1))
+        (keep if loose else moved)[rel] = data
+    if not moved:
+        raise ValueError(f"{name}: {len(files)} files and nothing movable")
+    if len(keep) + 1 > reserve:
+        raise ValueError(f"{name}: {len(keep)} loose files exceed the Claude upload budget")
+    keep["resources.zip"] = zip_bytes(moved, release_date)
+    text = keep["SKILL.md"].decode("utf-8")
+    note = ("\n## Packed resources (read this first)\n\n"
+            "Claude.ai accepts at most 200 files per uploaded skill, so " + str(len(moved)) + " supporting files (references, assets, scripts, examples) "
+            "are packed in `resources.zip` in this skill folder, with the SAME relative paths as the links in SKILL.md and each MODULE.md. "
+            "When a module links to a file that is not present as a loose file, read it from the archive instead of reporting it missing: "
+            "`python -c \"import zipfile; print(zipfile.ZipFile('resources.zip').read('modules/<module>/references/<file>').decode())\"` "
+            "or extract once with `python -m zipfile -e resources.zip resources/` and open `resources/<same path>`. "
+            "MODULE.md files and the entry point are loose and complete." "")
+    end = text.find("---", 3)
+    keep["SKILL.md"] = (text[:end + 3] + note + text[end + 3:]).encode("utf-8")
+    return keep
+
+
 def build_desktop_mapping(gpt, claude, opencode, release):
     """Simple Desktop layout: one folder per app, a `skills/` folder inside it, one ZIP per skill.
 
@@ -224,7 +258,7 @@ def build_desktop_mapping(gpt, claude, opencode, release):
             raise ValueError(f"{name}: SKILL.md missing")
         return z({name + "/" + rel: data for rel, data in sorted(files.items())})
     for name in sorted(claude):
-        result[f"Claude/skills/{name}.zip"] = one(name, claude[name])
+        result[f"Claude/skills/{name}.zip"] = one(name, fit_claude_upload(name, claude[name], release["date"]))
     for name in sorted(gpt):
         result[f"ChatGPT/skills/{name}.zip"] = one(name, gpt[name])
         result[f"Gemini/skills/{name}.zip"] = one(name, gemini_web_payload(name, gpt[name]))
@@ -238,7 +272,7 @@ def build_desktop_mapping(gpt, claude, opencode, release):
         chunk = names[i * size:(i + 1) * size]
         mapping = {}
         for name in chunk:
-            mapping.update({name + "/" + rel: data for rel, data in claude[name].items()})
+            mapping.update({name + "/" + rel: data for rel, data in fit_claude_upload(name, claude[name], release["date"]).items()})
         result[f"Claude/toplu-yukleme/grup-{i + 1}-({len(chunk)}-skill).zip"] = z(mapping)
     return result
 

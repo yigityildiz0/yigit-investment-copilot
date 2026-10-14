@@ -11,7 +11,7 @@ import library_views as views
 from library_site import site
 from publication_docs import INSTALL, MAINTAINING, LEGACY, LICENSE_SCOPE
 import build_host_variants as host
-from compact_desktop_packages import plugin_files, gemini_web_payload
+from compact_desktop_packages import plugin_files, gemini_web_payload, fit_claude_upload
 
 def put(root,path,text):
     p=root/path;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(text.rstrip()+'\n',encoding='utf-8',newline='\n')
@@ -61,7 +61,7 @@ def build(root):
         gpt_skills[name]=gpt
         one=plugin_files({name:gpt},{'version':reg['release']},name,provider='codex')
         binary(root,f'packages/chatgpt/{name}.zip',pack(one))
-        cl=host.desired_files(common/name,'claude',descriptions);parts={name:cl};coverage[name]={'source_skill':name,'split':False,'parts':[name]};part_names=[]
+        cl=fit_claude_upload(name,host.desired_files(common/name,'claude',descriptions),reg['release'][:10].replace('.','-'));parts={name:cl};coverage[name]={'source_skill':name,'split':False,'parts':[name]};part_names=[]
         for upload,payload in parts.items():
             blob=pack({upload+'/'+k:v for k,v in payload.items()});filename=upload+'.zip'
             binary(root,'packages/claude/'+filename,blob);claude_files[filename]=blob;part_names.append(filename)

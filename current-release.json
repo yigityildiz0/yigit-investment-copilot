@@ -1,5 +1,5 @@
 {
-  "edition": "2026.10.14.2",
+  "edition": "2026.10.14.3",
   "repository": "yigit-investment-copilot",
   "canonical": "universal-ai-skill-library",
   "skills": [
@@ -9,13 +9,13 @@
     "yigit-investment-copilot": 1
   },
   "artifact_sha256": {
-    "downloads/ChatGPT.zip": "217c5bd7091b06219e212b270dd77fd8b4a9e9756a10432fe7750433105c9401",
+    "downloads/ChatGPT.zip": "fc19ae1f74a3311723607b7c8ed9e672e5f82cdd3b454d2bc57c9d50db9fabe8",
     "downloads/Claude.zip": "680a5c141989ecf37614c41188a74b0a36550b36df31099c5843333ffed7aee9",
     "downloads/Codex.zip": "597a09f061fe560b51e4cf5c02b21446c0cbcf45341dafb9571cfacccb12643f",
     "downloads/Gemini.zip": "4276735319a960c7a8bd29f866b5dbdb901162ec8d277fa3fc161329b42724da",
     "downloads/portable-skills.zip": "3c90fa0cf936a9eb8d0f10edf3c5a24fffe7858be072865be00a283e02f4150b",
     "packages/portable/yigit-investment-copilot.zip": "3c90fa0cf936a9eb8d0f10edf3c5a24fffe7858be072865be00a283e02f4150b",
-    "packages/chatgpt/yigit-investment-copilot.zip": "217c5bd7091b06219e212b270dd77fd8b4a9e9756a10432fe7750433105c9401",
+    "packages/chatgpt/yigit-investment-copilot.zip": "fc19ae1f74a3311723607b7c8ed9e672e5f82cdd3b454d2bc57c9d50db9fabe8",
     "packages/claude/yigit-investment-copilot.zip": "d6a2bc6c0bd24075bfec6286a0a59a6064150c39c48ab816d3a7dfa5997e90f2",
     "packages/gemini/yigit-investment-copilot.zip": "6c0b6b2bcc16f55aa412a28d46cea8e884ce7f57f63cece0f4fc91975229e2d4"
   },
